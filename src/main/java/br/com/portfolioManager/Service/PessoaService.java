@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.caelum.stella.validation.CPFValidator;
 import br.com.caelum.stella.validation.InvalidStateException;
@@ -22,11 +23,26 @@ public class PessoaService {
 	public PessoaService(PessoaRepository service) {
 		this.service = service;
 	}
-
+	
 	@Transactional
-	public Pessoa gravar(Pessoa pessoa) {
-		return service.save(pessoa);
+	public String gravar(Pessoa pessoa, RedirectAttributes attributes) {
+	    if (service.existsByCpf(pessoa.getCpf())) {	    	
+	    	return "CPF existente";
+	        
+	    }
+	    service.save(pessoa);
+	    return "Pessoa salva";
 	}
+
+
+//	@Transactional
+//	public Pessoa gravar(Pessoa pessoa) {
+//		
+//		 if (service.existsByCpf(pessoa.getCpf())) {
+//		        throw new IllegalArgumentException("CPF já cadastrado.");
+//		    }
+//		return service.save(pessoa);
+//	}
 
 	@Transactional
 	public Pessoa atualizarPessoa(Pessoa pessoaAtualizada) {
@@ -90,5 +106,5 @@ public class PessoaService {
             return false;
         }
     }
-	
+		
 }

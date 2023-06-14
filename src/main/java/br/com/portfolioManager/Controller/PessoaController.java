@@ -62,23 +62,23 @@ public class PessoaController {
 	public String novaPessoa() {
 		return "cadastrar-pessoa";
 	}
-	
+
 	@PostMapping("/salvar")
 	public String criarPessoa(Pessoa pessoa, Model model, RedirectAttributes attributes) {
-	    if (!service.isCpfValido(pessoa.getCpf())) {
-	        attributes.addFlashAttribute("mensagem_error", "CPF inválido");
-	        return "redirect:/pessoas/novo";
-	    }
-
-	    Pessoa novoPessoa = service.gravar(pessoa);
-	    if (Objects.nonNull(novoPessoa)) {
-	        this.result = "sucesso";
-	        attributes.addFlashAttribute("mensagem", "Pessoa salva com sucesso!");
-	        return "redirect:/pessoas/novo";
-	    }
-
-	    attributes.addFlashAttribute("mensagem_error", "Erro ao cadastrar Pessoa.");
-	    return "redirect:/pessoas/novo";
+		if (!service.isCpfValido(pessoa.getCpf())) {
+			attributes.addFlashAttribute("mensagem_error", "CPF inválido");
+			return "redirect:/pessoas/novo";
+		}
+		String mensagemRetorno = service.gravar(pessoa, attributes);
+		if (mensagemRetorno.equals("CPF existente")) {
+			attributes.addFlashAttribute("mensagem_error", "CPF já cadastrado na base de dados!");
+			return "redirect:/pessoas/novo";
+		} else if (mensagemRetorno.equals("Pessoa salva")) {
+			attributes.addFlashAttribute("mensagem", "Pessoa salva com sucesso!");
+			return "redirect:/pessoas/novo";
+		}
+		attributes.addFlashAttribute("mensagem_error", "Erro ao cadastrar Pessoa.");
+		return "redirect:/pessoas/novo";
 	}
 
 	@GetMapping("/editar/{id}")
