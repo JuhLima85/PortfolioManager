@@ -6,6 +6,13 @@
 SimpleDateFormat dataFormatada  = new SimpleDateFormat("dd/MM/yyyy");
  %>
  
+ <div class="d-flex justify-content-center"> <c:if
+	test="${not empty mensagem}">
+	<div class="alert alert-success" role="alert">${mensagem}</div>
+</c:if> <c:if test="${not empty mensagem_error}">
+	<div class="alert alert-danger" role="alert">${mensagem_error}</div>
+</c:if> </div>
+ 
 <div class="container mt-3">
 	<div class="card card-custom-width-two">
 		<div class="card-body">

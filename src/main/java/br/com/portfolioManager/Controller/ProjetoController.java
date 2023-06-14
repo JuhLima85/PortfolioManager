@@ -101,23 +101,20 @@ public class ProjetoController {
 	@PostMapping("/salvar")
 	public String criarProjeto(Projeto projeto, @RequestParam(name = "gerentes") Optional<Long> gerenteIdOptional,
             Model model, RedirectAttributes attributes) {
+		
 		 Long gerenteId = null;
 		 if (gerenteIdOptional.isPresent()) {
 		        gerenteId = gerenteIdOptional.get();
 		        Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
 		        projeto.setGerenteResponsavel(gerente);
 		    } else {
-		        attributes.addFlashAttribute("mensagem", "Cadastre primeiro uma pessoa e depois o projeto.");
+		        attributes.addFlashAttribute("mensagem", "Cadastre primeiro um funcionário e depois o projeto.");
 		        return "redirect:/pessoas/novo";
 		    }
-		 
-		Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
-		projeto.setGerenteResponsavel(gerente);
-
+	
 		String classificacaoRisco = determinarClassificacaoRisco(projeto);
-		projeto.setRisco(classificacaoRisco);
+		projeto.setRisco(classificacaoRisco);		
 		
-		List<Pessoa> pessoaExistente = pessoaService.listarTodasPessoas();
 		Projeto novoProjeto = projetoService.salvarProjeto(projeto);
 
 		if (Objects.nonNull(novoProjeto)) {			
@@ -127,42 +124,21 @@ public class ProjetoController {
 		attributes.addFlashAttribute("mensagem-error", "Erro ao cadastrar projeto");
 		return "redirect:/projetos/novo";
 	}
-
-//	@PostMapping("/salvar")
-//	public String criarProjeto(Projeto projeto, @RequestParam("gerentes") Long gerenteId, Model model,
-//			RedirectAttributes attributes) {
-//		
-//		 if (gerenteId != null) {
-//		        Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
-//		        projeto.setGerenteResponsavel(gerente);
-//		    } else {
-//		        attributes.addFlashAttribute("mensagem", "Cadastre primeiro uma pessoa e depois o projeto.");
-//		        return "redirect:/pessoas/novo";
-//		    }
-//		 
-//		Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
-//		projeto.setGerenteResponsavel(gerente);
-//
-//		String classificacaoRisco = determinarClassificacaoRisco(projeto);
-//		projeto.setRisco(classificacaoRisco);
-//		
-//		List<Pessoa> pessoaExistente = pessoaService.listarTodasPessoas();
-//		Projeto novoProjeto = projetoService.salvarProjeto(projeto);
-//
-//		if (Objects.nonNull(novoProjeto)) {			
-//			attributes.addFlashAttribute("mensagem", "Projeto salvo com sucesso!");
-//			return "redirect:/projetos/novo";
-//		}
-//		attributes.addFlashAttribute("mensagem-error", "Erro ao cadastrar projeto");
-//		return "redirect:/projetos/novo";
-//	}
-
+	
 	@PostMapping("/remover/{id}")
 	public String excluirProjeto(@PathVariable Long id, RedirectAttributes attributes) {
-		projetoService.excluirProjeto(id);
-		List<Projeto> lista = projetoService.listarProjetos();
-		attributes.addFlashAttribute("projetos", lista);
-		return "redirect:/projetos/listar";
+	    try {
+	        if (id != null) {
+	            projetoService.excluirProjeto(id);
+	            List<Projeto> lista = projetoService.listarProjetos();
+	            attributes.addFlashAttribute("projetos", lista);
+	            attributes.addFlashAttribute("mensagem", "Projeto excluído com sucesso!");
+	            return "redirect:/projetos/listar";
+	        }
+	    } catch (Exception e) {	        
+	        attributes.addFlashAttribute("mensagem", "Erro ao excluir projeto: " + e.getMessage());
+	    }
+	    return "redirect:/projetos/listar";
 	}
 
 	private String determinarClassificacaoRisco(Projeto projeto) {

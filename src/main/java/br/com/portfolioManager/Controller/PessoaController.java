@@ -1,7 +1,5 @@
 package br.com.portfolioManager.Controller;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -25,7 +23,7 @@ import br.com.portfolioManager.Service.ProjetoService;
 public class PessoaController {
 
 	private PessoaService service;
-	
+
 	@Autowired
 	private ProjetoService projetoService;
 
@@ -36,10 +34,10 @@ public class PessoaController {
 	public PessoaController(PessoaService service) {
 		this.service = service;
 	}
-	
+
 	@GetMapping("/listar")
-	public String listar(Model model) {				
-		List<Pessoa> lista = service.listarTodasPessoas();	
+	public String listar(Model model) {
+		List<Pessoa> lista = service.listarTodasPessoas();
 		List<Pessoa> gerentesResponsaveis = projetoService.isGerenteResponsavel();
 		model.addAttribute("pessoas", lista);
 		model.addAttribute("gerentesResponsaveis", gerentesResponsaveis);
@@ -66,8 +64,8 @@ public class PessoaController {
 	}
 
 	@PostMapping("/salvar")
-	public String criarPessoa(Pessoa pessoa, Model model, RedirectAttributes attributes) {		
-				
+	public String criarPessoa(Pessoa pessoa, Model model, RedirectAttributes attributes) {
+
 		Pessoa novoPessoa = service.gravar(pessoa);
 		if (Objects.nonNull(novoPessoa)) {
 			this.result = "sucesso";
@@ -104,10 +102,19 @@ public class PessoaController {
 
 	@PostMapping("/remover/{id}")
 	public String excluirPessoa(@PathVariable Long id, RedirectAttributes attributes) {
-		this.service.removerPessoa(id);
-		List<Pessoa> lista = this.service.listarTodasPessoas();
-		attributes.addFlashAttribute("pessoas", lista);
+		try {
+			if (id != null) {
+				this.service.removerPessoa(id);
+				List<Pessoa> lista = this.service.listarTodasPessoas();
+				attributes.addFlashAttribute("pessoas", lista);
+				attributes.addFlashAttribute("mensagem", "Pessoa excluída com sucesso!");
+				return "redirect:/pessoas/listar";
+			}
+
+		} catch (Exception e) {
+			attributes.addFlashAttribute("mensagem", "Erro ao excluir pessoa: " + e.getMessage());
+		}
+
 		return "redirect:/pessoas/listar";
 	}
-
 }
