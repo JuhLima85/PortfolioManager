@@ -62,19 +62,23 @@ public class PessoaController {
 	public String novaPessoa() {
 		return "cadastrar-pessoa";
 	}
-
+	
 	@PostMapping("/salvar")
 	public String criarPessoa(Pessoa pessoa, Model model, RedirectAttributes attributes) {
+	    if (!service.isCpfValido(pessoa.getCpf())) {
+	        attributes.addFlashAttribute("mensagem_error", "CPF inválido");
+	        return "redirect:/pessoas/novo";
+	    }
 
-		Pessoa novoPessoa = service.gravar(pessoa);
-		if (Objects.nonNull(novoPessoa)) {
-			this.result = "sucesso";
-			attributes.addFlashAttribute("mensagem", "Pessoa salva com sucesso!");
+	    Pessoa novoPessoa = service.gravar(pessoa);
+	    if (Objects.nonNull(novoPessoa)) {
+	        this.result = "sucesso";
+	        attributes.addFlashAttribute("mensagem", "Pessoa salva com sucesso!");
+	        return "redirect:/pessoas/novo";
+	    }
 
-			return "redirect:/pessoas/novo";
-		}
-		attributes.addFlashAttribute("mensagem-error", "Erro ao cadastrar Pessoa.");
-		return "redirect:/pessoas/novo";
+	    attributes.addFlashAttribute("mensagem_error", "Erro ao cadastrar Pessoa.");
+	    return "redirect:/pessoas/novo";
 	}
 
 	@GetMapping("/editar/{id}")
@@ -96,7 +100,7 @@ public class PessoaController {
 			attributes.addFlashAttribute("mensagem", "Pessoa atualizada com sucesso!");
 			return "redirect:/pessoas/listar";
 		}
-		attributes.addFlashAttribute("mensagem-error", "Erro ao atualizar Pessoa.");
+		attributes.addFlashAttribute("mensagem_error", "Erro ao atualizar Pessoa.");
 		return "redirect:/pessoas/listar";
 	}
 
@@ -112,7 +116,7 @@ public class PessoaController {
 			}
 
 		} catch (Exception e) {
-			attributes.addFlashAttribute("mensagem", "Erro ao excluir pessoa: " + e.getMessage());
+			attributes.addFlashAttribute("mensagem_error", "Erro ao excluir pessoa: " + e.getMessage());
 		}
 
 		return "redirect:/pessoas/listar";

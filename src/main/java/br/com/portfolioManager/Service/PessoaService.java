@@ -1,7 +1,5 @@
 package br.com.portfolioManager.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -10,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.caelum.stella.validation.CPFValidator;
+import br.com.caelum.stella.validation.InvalidStateException;
 import br.com.portfolioManager.Entity.Pessoa;
 import br.com.portfolioManager.Repository.PessoaRepository;
 
@@ -79,5 +79,16 @@ public class PessoaService {
 			throw new NoSuchElementException("Pessoa não encontrada");
 		}
 	}
+	
+	public boolean isCpfValido(String cpf) {
+		cpf = cpf.replaceAll("[^0-9]", "");
+        CPFValidator validator = new CPFValidator();
+        try {
+            validator.assertValid(cpf);
+            return true;
+        } catch (InvalidStateException e) {
+            return false;
+        }
+    }
 	
 }

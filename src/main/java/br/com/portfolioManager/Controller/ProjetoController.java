@@ -1,11 +1,6 @@
 package br.com.portfolioManager.Controller;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -108,7 +103,7 @@ public class ProjetoController {
 		        Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
 		        projeto.setGerenteResponsavel(gerente);
 		    } else {
-		        attributes.addFlashAttribute("mensagem", "Cadastre primeiro um funcionário e depois o projeto.");
+		        attributes.addFlashAttribute("mensagem_error", "Cadastre primeiro um funcionário e depois o projeto.");
 		        return "redirect:/pessoas/novo";
 		    }
 	
@@ -121,7 +116,7 @@ public class ProjetoController {
 			attributes.addFlashAttribute("mensagem", "Projeto salvo com sucesso!");
 			return "redirect:/projetos/novo";
 		}
-		attributes.addFlashAttribute("mensagem-error", "Erro ao cadastrar projeto");
+		attributes.addFlashAttribute("mensagem_error", "Erro ao cadastrar projeto");
 		return "redirect:/projetos/novo";
 	}
 	
