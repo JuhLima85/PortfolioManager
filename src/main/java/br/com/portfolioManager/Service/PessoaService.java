@@ -34,16 +34,6 @@ public class PessoaService {
 	    return "Pessoa salva";
 	}
 
-
-//	@Transactional
-//	public Pessoa gravar(Pessoa pessoa) {
-//		
-//		 if (service.existsByCpf(pessoa.getCpf())) {
-//		        throw new IllegalArgumentException("CPF já cadastrado.");
-//		    }
-//		return service.save(pessoa);
-//	}
-
 	@Transactional
 	public Pessoa atualizarPessoa(Pessoa pessoaAtualizada) {
 		Long pessoaId = pessoaAtualizada.getId();

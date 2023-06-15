@@ -1,6 +1,8 @@
 package br.com.portfolioManager.Service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -8,6 +10,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.portfolioManager.Entity.Pessoa;
 import br.com.portfolioManager.Entity.Projeto;
@@ -30,13 +33,43 @@ public class ProjetoService {
 	}
 
 	@Transactional
-	public Projeto salvarProjeto(Projeto projeto) {
+	public String salvarProjeto(Projeto projeto, RedirectAttributes attributes) {
+		Date dataAtualSemHora = dataSemHora(new Date());
+		Date dataInicio = dataSemHora(projeto.getDataInicio());
+		Date dataPrevisaoFim = dataSemHora(projeto.getDataPrevisaoFim());
+
+		if (dataInicio.before(dataAtualSemHora)) {
+			return "início";
+		}
+		if (dataPrevisaoFim.before(dataInicio)) {
+
+			return "previsão";
+		}
+		if (projeto.getDataFim() != null) {
+			Date dataFim = dataSemHora(projeto.getDataFim());
+			if (dataFim != null && dataFim.before(dataInicio)) {
+
+				return "fim";
+			}
+		}
+
 		try {
 			projetoRepository.save(projeto);
 		} catch (Exception e) {
-			e.getMessage();
+			throw new IllegalArgumentException("Erro ao cadastrar projeto: " + e.getMessage());
 		}
-		return projeto;
+
+		return "Projeto salvo";
+	}
+
+	private Date dataSemHora(Date data) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(data);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime();
 	}
 
 	@Transactional

@@ -21,7 +21,6 @@ import br.com.portfolioManager.Entity.Projeto;
 import br.com.portfolioManager.Service.PessoaService;
 import br.com.portfolioManager.Service.ProjetoService;
 
-
 @Controller
 @RequestMapping("/projetos")
 public class ProjetoController {
@@ -92,48 +91,60 @@ public class ProjetoController {
 		attributes.addFlashAttribute("mensagem-error", "Erro ao atualizar Pessoa.");
 		return "redirect:/projetos/listar";
 	}
-	
+
 	@PostMapping("/salvar")
 	public String criarProjeto(Projeto projeto, @RequestParam(name = "gerentes") Optional<Long> gerenteIdOptional,
-            Model model, RedirectAttributes attributes) {
-		
-		 Long gerenteId = null;
-		 if (gerenteIdOptional.isPresent()) {
-		        gerenteId = gerenteIdOptional.get();
-		        Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
-		        projeto.setGerenteResponsavel(gerente);
-		    } else {
-		        attributes.addFlashAttribute("mensagem_error", "Cadastre primeiro um funcionário e depois o projeto.");
-		        return "redirect:/pessoas/novo";
-		    }
-	
-		String classificacaoRisco = determinarClassificacaoRisco(projeto);
-		projeto.setRisco(classificacaoRisco);		
-		
-		Projeto novoProjeto = projetoService.salvarProjeto(projeto);
+			Model model, RedirectAttributes attributes) {
 
-		if (Objects.nonNull(novoProjeto)) {			
-			attributes.addFlashAttribute("mensagem", "Projeto salvo com sucesso!");
-			return "redirect:/projetos/novo";
+		try {
+			Long gerenteId = null;
+			if (gerenteIdOptional.isPresent()) {
+				gerenteId = gerenteIdOptional.get();
+				Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
+				projeto.setGerenteResponsavel(gerente);
+			} else {
+				attributes.addFlashAttribute("mensagem_error", "Cadastre primeiro um funcionário e depois o projeto.");
+				return "redirect:/pessoas/novo";
+			}
+
+			String classificacaoRisco = determinarClassificacaoRisco(projeto);
+			projeto.setRisco(classificacaoRisco);
+
+			String mensagemRetorno = projetoService.salvarProjeto(projeto, attributes);
+			if (mensagemRetorno.equals("início")) {
+				attributes.addFlashAttribute("mensagem_error", "A data de início não pode ser anterior à data atual.");
+				return "redirect:/projetos/novo";
+			} else if (mensagemRetorno.equals("previsão")) {
+				attributes.addFlashAttribute("mensagem_error",
+						"A data de previsão de término não pode ser anterior à data de início.");
+				return "redirect:/projetos/novo";
+			} else if (mensagemRetorno.equals("fim")) {
+				attributes.addFlashAttribute("mensagem_error", "A data de fim não pode ser anterior à data de início.");
+				return "redirect:/projetos/novo";
+			} else if (mensagemRetorno.equals("Projeto salvo")) {
+				attributes.addFlashAttribute("mensagem", "Projeto salvo com sucesso!");
+				return "redirect:/projetos/novo";
+			}
+			throw new IllegalArgumentException("Erro ao cadastrar projeto");
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Erro ao cadastrar projeto: " + e.getMessage());
 		}
-		attributes.addFlashAttribute("mensagem_error", "Erro ao cadastrar projeto");
-		return "redirect:/projetos/novo";
 	}
-	
+
 	@PostMapping("/remover/{id}")
 	public String excluirProjeto(@PathVariable Long id, RedirectAttributes attributes) {
-	    try {
-	        if (id != null) {
-	            projetoService.excluirProjeto(id);
-	            List<Projeto> lista = projetoService.listarProjetos();
-	            attributes.addFlashAttribute("projetos", lista);
-	            attributes.addFlashAttribute("mensagem", "Projeto excluído com sucesso!");
-	            return "redirect:/projetos/listar";
-	        }
-	    } catch (Exception e) {	        
-	        attributes.addFlashAttribute("mensagem", "Erro ao excluir projeto: " + e.getMessage());
-	    }
-	    return "redirect:/projetos/listar";
+		try {
+			if (id != null) {
+				projetoService.excluirProjeto(id);
+				List<Projeto> lista = projetoService.listarProjetos();
+				attributes.addFlashAttribute("projetos", lista);
+				attributes.addFlashAttribute("mensagem", "Projeto excluído com sucesso!");
+				return "redirect:/projetos/listar";
+			}
+		} catch (Exception e) {
+			attributes.addFlashAttribute("mensagem", "Erro ao excluir projeto: " + e.getMessage());
+		}
+		return "redirect:/projetos/listar";
 	}
 
 	private String determinarClassificacaoRisco(Projeto projeto) {
