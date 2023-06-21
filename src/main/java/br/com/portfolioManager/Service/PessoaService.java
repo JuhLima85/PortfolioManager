@@ -23,32 +23,45 @@ public class PessoaService {
 	public PessoaService(PessoaRepository service) {
 		this.service = service;
 	}
-	
-	@Transactional
+
 	public String gravar(Pessoa pessoa, RedirectAttributes attributes) {
-	    if (service.existsByCpf(pessoa.getCpf())) {	    	
-	    	return "CPF existente";
-	        
-	    }
-	    service.save(pessoa);
-	    return "Pessoa salva";
+		try {
+			if (service.existsByCpf(pessoa.getCpf())) {
+				return "CPF existente";
+			}
+			service.save(pessoa);
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Erro ao cadastrar pessoa: " + e.getMessage());
+		}
+		return "Pessoa salva";
 	}
 
 	@Transactional
-	public Pessoa atualizarPessoa(Pessoa pessoaAtualizada) {
-		Long pessoaId = pessoaAtualizada.getId();
-		Optional<Pessoa> pessoaExistente = service.findById(pessoaId);
+	public String atualizarPessoa(Pessoa pessoaAtualizada, RedirectAttributes attributes) {
+		try {
+			if (service.existsByCpf(pessoaAtualizada.getCpf())) {
+				return "CPF existente";
+			}
+			Long pessoaId = pessoaAtualizada.getId();
+			Optional<Pessoa> pessoaExistente = service.findById(pessoaId);
 
-		if (pessoaExistente.isPresent()) {
-			Pessoa pessoa = pessoaExistente.get();
-			pessoa.setNome(pessoaAtualizada.getNome());
-			pessoa.setCpf(pessoaAtualizada.getCpf());
-			pessoa.setDataNascimento(pessoaAtualizada.getDataNascimento());
-			pessoa.setFuncionario(pessoaAtualizada.isFuncionario());
-			return service.save(pessoa);
-		} else {
-			throw new NoSuchElementException("Pessoa não encontrada");
+			if (pessoaExistente.isPresent()) {
+				Pessoa pessoa = pessoaExistente.get();
+				pessoa.setNome(pessoaAtualizada.getNome());
+				pessoa.setCpf(pessoaAtualizada.getCpf());
+				pessoa.setDataNascimento(pessoaAtualizada.getDataNascimento());
+				pessoa.setFuncionario(pessoaAtualizada.isFuncionario());
+				service.save(pessoa);
+			}
+
+		} catch (Exception e) {
+
+			throw new IllegalArgumentException("Erro ao atualizar pessoa: " + e.getMessage());
 		}
+
+		return "Pessoa atualizada";
+
 	}
 
 	@Transactional
@@ -85,16 +98,15 @@ public class PessoaService {
 			throw new NoSuchElementException("Pessoa não encontrada");
 		}
 	}
-	
+
 	public boolean isCpfValido(String cpf) {
 		cpf = cpf.replaceAll("[^0-9]", "");
-        CPFValidator validator = new CPFValidator();
-        try {
-            validator.assertValid(cpf);
-            return true;
-        } catch (InvalidStateException e) {
-            return false;
-        }
-    }
-		
+		CPFValidator validator = new CPFValidator();
+		try {
+			validator.assertValid(cpf);
+			return true;
+		} catch (InvalidStateException e) {
+			return false;
+		}
+	}
 }

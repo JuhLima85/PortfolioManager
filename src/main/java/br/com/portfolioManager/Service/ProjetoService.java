@@ -62,7 +62,7 @@ public class ProjetoService {
 		return "Projeto salvo";
 	}
 
-	private Date dataSemHora(Date data) {
+	public Date dataSemHora(Date data) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(data);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -98,12 +98,13 @@ public class ProjetoService {
 		if (projetoExistente.isPresent()) {
 			Projeto projeto = projetoExistente.get();
 			projeto.setNome(projetoAtualizado.getNome());
-			projeto.setDescricao(projetoAtualizado.getDescricao());
 			projeto.setDataInicio(projetoAtualizado.getDataInicio());
 			projeto.setDataPrevisaoFim(projetoAtualizado.getDataPrevisaoFim());
 			projeto.setDataFim(projetoAtualizado.getDataFim());
-			projeto.setOrcamento(projetoAtualizado.getOrcamento());
+			projeto.setDescricao(projetoAtualizado.getDescricao());
 			projeto.setStatus(projetoAtualizado.getStatus());
+			projeto.setOrcamento(projetoAtualizado.getOrcamento());
+			projeto.setRisco(projetoAtualizado.getRisco());
 			projeto.setGerenteResponsavel(projetoAtualizado.getGerenteResponsavel());
 			return projetoRepository.save(projeto);
 		} else {

@@ -2,7 +2,6 @@ package br.com.portfolioManager.Controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.portfolioManager.Entity.Pessoa;
@@ -59,26 +59,36 @@ public class PessoaController {
 	}
 
 	@GetMapping("/novo")
-	public String novaPessoa() {
-		return "cadastrar-pessoa";
+	public String novaPessoa(@RequestParam(value = "acao", required = false) String acao) {
+		if (acao != null && acao.equals("atualizar")) {
+			return "editar-pessoa";
+		} else {
+			return "cadastrar-pessoa";
+		}
 	}
 
 	@PostMapping("/salvar")
 	public String criarPessoa(Pessoa pessoa, Model model, RedirectAttributes attributes) {
-		if (!service.isCpfValido(pessoa.getCpf())) {
-			attributes.addFlashAttribute("mensagem_error", "CPF inválido");
-			return "redirect:/pessoas/novo";
+		try {
+			if (!service.isCpfValido(pessoa.getCpf())) {
+				attributes.addFlashAttribute("pessoa", pessoa);
+				attributes.addFlashAttribute("mensagem_error", "CPF inválido");
+				return "redirect:/pessoas/novo";
+			}
+			String mensagemRetorno = service.gravar(pessoa, attributes);
+			if (mensagemRetorno.equals("CPF existente")) {
+				attributes.addFlashAttribute("pessoa", pessoa);
+				attributes.addFlashAttribute("mensagem_error", "CPF já cadastrado na base de dados!");
+				return "redirect:/pessoas/novo";
+			} else if (mensagemRetorno.equals("Pessoa salva")) {
+				attributes.addFlashAttribute("mensagem", "Pessoa salva com sucesso!");
+				return "redirect:/pessoas/listar";
+			}
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Erro ao cadastrar pessoa: " + e.getMessage());
 		}
-		String mensagemRetorno = service.gravar(pessoa, attributes);
-		if (mensagemRetorno.equals("CPF existente")) {
-			attributes.addFlashAttribute("mensagem_error", "CPF já cadastrado na base de dados!");
-			return "redirect:/pessoas/novo";
-		} else if (mensagemRetorno.equals("Pessoa salva")) {
-			attributes.addFlashAttribute("mensagem", "Pessoa salva com sucesso!");
-			return "redirect:/pessoas/novo";
-		}
-		attributes.addFlashAttribute("mensagem_error", "Erro ao cadastrar Pessoa.");
-		return "redirect:/pessoas/novo";
+		return "redirect:/pessoas/listar";
 	}
 
 	@GetMapping("/editar/{id}")
@@ -94,13 +104,25 @@ public class PessoaController {
 
 	@PostMapping("/atualizar")
 	public String atualizarPessoa(Pessoa pessoa, Model model, RedirectAttributes attributes) {
-		Pessoa pessoaExistente = service.atualizarPessoa(pessoa);
-		if (Objects.nonNull(pessoaExistente)) {
-			this.result = "sucesso";
-			attributes.addFlashAttribute("mensagem", "Pessoa atualizada com sucesso!");
-			return "redirect:/pessoas/listar";
+		try {
+			if (!service.isCpfValido(pessoa.getCpf())) {
+				attributes.addFlashAttribute("pessoa", pessoa);
+				attributes.addFlashAttribute("mensagem_error", "CPF inválido");
+				return "redirect:/pessoas/novo?acao=atualizar";
+			}
+			String mensagemRetorno = service.atualizarPessoa(pessoa, attributes);
+			if (mensagemRetorno.equals("CPF existente")) {
+				attributes.addFlashAttribute("pessoa", pessoa);
+				attributes.addFlashAttribute("mensagem_error", "CPF já cadastrado na base de dados!");
+				return "redirect:/pessoas/novo?acao=atualizar";
+			} else if (mensagemRetorno.equals("Pessoa atualizada")) {
+				attributes.addFlashAttribute("mensagem", "Pessoa atualizada com sucesso!");
+				return "redirect:/pessoas/listar";
+			}
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Erro ao atualizar pessoa: " + e.getMessage());
 		}
-		attributes.addFlashAttribute("mensagem_error", "Erro ao atualizar Pessoa.");
 		return "redirect:/pessoas/listar";
 	}
 

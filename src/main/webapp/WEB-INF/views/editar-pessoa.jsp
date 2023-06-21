@@ -1,17 +1,25 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+	<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ include file="./base.jsp"%>
-
 <%
-SimpleDateFormat dataFormatada  = new SimpleDateFormat("dd/MM/yyyy");
- %>
+SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
+%>
 
+<div class="d-flex justify-content-center">
+	<c:if test="${not empty mensagem}">
+		<div class="alert alert-success" role="alert">${mensagem}</div>
+	</c:if>
+	<c:if test="${not empty mensagem_error}">
+		<div class="alert alert-danger" role="alert">${mensagem_error}</div>
+	</c:if>
+</div>
 <div class="container mt-3">
 	<div class="card card-custom-width">
 		<div class="card-body">
 			<h1 class="text-center">Editar Pessoa</h1>
 			<form method="POST" action="/codedeving/pessoas/atualizar"
-				modelAttribute="gerenteRequest">
+				modelAttribute="editar-pessoa">
 				<div class="form-group d-none">
 					<label for="id">Id</label> <input type="text" value="${pessoa.id}"
 						class="form-control" id="nomePessoa" name="id" readonly="readonly">
@@ -25,12 +33,13 @@ SimpleDateFormat dataFormatada  = new SimpleDateFormat("dd/MM/yyyy");
 					<label for="nome">CPF</label> <input type="text"
 						value="${pessoa.cpf}" class="form-control" id="cpfPessoa"
 						name="cpf">
-				</div>				
-				<div class="form-group">
-					<label for="nome">Data de Nascimento</label> 
-					<input type="text" value="<fmt:formatDate value="${pessoa.dataNascimento}" pattern="dd/MM/yyyy" />" class="form-control" id="dataNascimentoPessoa" name="dataNascimento">
 				</div>
-				
+				<div class="form-group">
+					<label for="nome">Data de Nascimento</label> <input type="text"
+						value="<fmt:formatDate value="${pessoa.dataNascimento}" pattern="dd/MM/yyyy" />"
+						class="form-control" id="dataNascimentoPessoa"
+						name="dataNascimento">
+				</div>
 				<div class="form-group">
 					<label for="funcionarioPessoa">Funcionário?</label> <select
 						class="form-control" id="funcionarioPessoa" name="funcionario">
@@ -46,5 +55,4 @@ SimpleDateFormat dataFormatada  = new SimpleDateFormat("dd/MM/yyyy");
 		</div>
 	</div>
 </div>
-
 <jsp:include page="rodape.jsp" />

@@ -11,7 +11,7 @@
 
     <!-- Enables the Spring MVC @Controller programming model -->
     <annotation-driven />
-    <context:component-scan base-package="com.br.projetoPortFolio" />
+    <context:component-scan base-package="com.br.portfolioManager"/>
 
     <!-- Resolves views selected for rendering by @Controllers to .jsp resources
         in the /WEB-INF/views directory -->

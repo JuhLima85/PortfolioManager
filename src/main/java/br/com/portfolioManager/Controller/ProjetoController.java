@@ -1,6 +1,8 @@
 package br.com.portfolioManager.Controller;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,8 +28,6 @@ import br.com.portfolioManager.Service.ProjetoService;
 public class ProjetoController {
 
 	private List<Pessoa> pessoas;
-
-	private String result;
 
 	@Autowired
 	private ProjetoService projetoService;
@@ -63,9 +63,16 @@ public class ProjetoController {
 	public String editarProjeto(@PathVariable Long id, Model model) {
 		Optional<Projeto> projeto = projetoService.buscarProjeto(id);
 		this.pessoas = this.pessoaService.listarTodasPessoas();
-		model.addAttribute("pessoas", this.pessoas);
+
 		if (projeto.isPresent()) {
+			NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+			String orcamentoFormatado = format.format(projeto.get().getOrcamento());
+			
+			
+			model.addAttribute("pessoas", this.pessoas);
 			model.addAttribute("projeto", projeto.get());
+			model.addAttribute("orcamentoFormatado", orcamentoFormatado);
+
 			return "editar-projeto";
 		} else {
 			return "editar-projeto";
@@ -81,10 +88,9 @@ public class ProjetoController {
 
 		String classificacaoRisco = determinarClassificacaoRisco(projeto);
 		projeto.setRisco(classificacaoRisco);
-
 		Projeto projetoExistente = projetoService.atualizarProjeto(projeto);
+
 		if (Objects.nonNull(projetoExistente)) {
-			this.result = "sucesso";
 			attributes.addFlashAttribute("mensagem", "Pessoa atualizada com sucesso!");
 			return "redirect:/projetos/listar";
 		}
@@ -103,6 +109,7 @@ public class ProjetoController {
 				Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
 				projeto.setGerenteResponsavel(gerente);
 			} else {
+				attributes.addFlashAttribute("projetos", projeto);
 				attributes.addFlashAttribute("mensagem_error", "Cadastre primeiro um funcionário e depois o projeto.");
 				return "redirect:/pessoas/novo";
 			}
@@ -110,25 +117,35 @@ public class ProjetoController {
 			String classificacaoRisco = determinarClassificacaoRisco(projeto);
 			projeto.setRisco(classificacaoRisco);
 
+			NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+			String orcamentoFormatado = format.format(projeto.getOrcamento());
+			model.addAttribute("orcamentoFormatado", orcamentoFormatado);
+
 			String mensagemRetorno = projetoService.salvarProjeto(projeto, attributes);
 			if (mensagemRetorno.equals("início")) {
+				attributes.addFlashAttribute("projeto", projeto);
+				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
 				attributes.addFlashAttribute("mensagem_error", "A data de início não pode ser anterior à data atual.");
 				return "redirect:/projetos/novo";
 			} else if (mensagemRetorno.equals("previsão")) {
+				attributes.addFlashAttribute("projeto", projeto);
+				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
 				attributes.addFlashAttribute("mensagem_error",
 						"A data de previsão de término não pode ser anterior à data de início.");
 				return "redirect:/projetos/novo";
 			} else if (mensagemRetorno.equals("fim")) {
+				attributes.addFlashAttribute("projeto", projeto);
+				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
 				attributes.addFlashAttribute("mensagem_error", "A data de fim não pode ser anterior à data de início.");
 				return "redirect:/projetos/novo";
 			} else if (mensagemRetorno.equals("Projeto salvo")) {
 				attributes.addFlashAttribute("mensagem", "Projeto salvo com sucesso!");
 				return "redirect:/projetos/novo";
 			}
-			throw new IllegalArgumentException("Erro ao cadastrar projeto");
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao cadastrar projeto: " + e.getMessage());
 		}
+		return "redirect:/projetos/novo";
 	}
 
 	@PostMapping("/remover/{id}")
