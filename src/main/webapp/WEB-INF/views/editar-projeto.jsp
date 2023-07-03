@@ -9,8 +9,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 	<div class="card card-custom-width">
 		<div class="card-body">
 			<h1 class="text-center">Editar Projeto</h1>
-			<form method="POST" action="/codedeving/projetos/atualizar">
-				<!-- modelAttribute="gerenteRequest" -->
+			<form method="POST" action="/codedeving/projetos/atualizar">				
 				<div class="form-group d-none">
 					<label for="id">Id</label> <input type="text" value="${projeto.id}"
 						class="form-control" id="nomeProjeto" name="id"
@@ -137,18 +136,30 @@ function handleStatusChange() {
     }
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+	  formatarOrcamento();
+	});
+
+	function formatarOrcamento() {
+		var orcamentoInput = document.getElementById('orcamentoProjeto');
+		  orcamentoInput.value = orcamentoInput.value.replace(/([^0-9.])/g, '');
+		  orcamentoInput.value = orcamentoInput.value.replace(/\./g, ''); 
+		  orcamentoInput.value = orcamentoInput.value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.'); 
+		  orcamentoInput.value = orcamentoInput.value.replace(/,/g, '.'); 
+	}
+
+
  $(document).ready(function() {
 $('#orcamentoProjeto').mask('000.000.000.000.000,00', {
     reverse : true
 });
 });
-
-document.querySelector('form').addEventListener('submit', function() {
-var orcamentoInput = document.getElementById('orcamentoProjeto');
-orcamentoInput.value = orcamentoInput.value.replace('.', '');
-orcamentoInput.value = orcamentoInput.value.replace(',', '.');
-}); 
-
+ 
+ document.querySelector('form').addEventListener('submit', function() {
+	    var orcamentoInput = document.getElementById('orcamentoProjeto');
+	    orcamentoInput.value = orcamentoInput.value.replace(/\./g, '');
+	    orcamentoInput.value = orcamentoInput.value.replace(',', '.'); 
+	});
 
 var statusProjeto = document.getElementById("statusProjeto");
 statusProjeto.addEventListener("change", handleStatusChange);
