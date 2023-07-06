@@ -38,6 +38,10 @@ public class ProjetoController {
 	@GetMapping("/listar")
 	public String listar(Model model) {
 		List<Projeto> lista = projetoService.listarProjetos();
+		for (Projeto projeto : lista) {
+			String classificacaoRisco = projetoService.determinarClassificacaoRisco(projeto);
+			projeto.setRisco(classificacaoRisco);
+		}
 		model.addAttribute("projetos", lista);
 		return "listar-projetos";
 	}
@@ -63,15 +67,12 @@ public class ProjetoController {
 	public String editarProjeto(@PathVariable Long id, Model model) {
 		Optional<Projeto> projeto = projetoService.buscarProjeto(id);
 		this.pessoas = this.pessoaService.listarTodasPessoas();
-
 		if (projeto.isPresent()) {
 			NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 			String orcamentoFormatado = format.format(projeto.get().getOrcamento());
-
 			model.addAttribute("pessoas", this.pessoas);
 			model.addAttribute("projeto", projeto.get());
 			model.addAttribute("orcamentoFormatado", orcamentoFormatado);
-
 			return "editar-projeto";
 		} else {
 			return "editar-projeto";
@@ -84,11 +85,9 @@ public class ProjetoController {
 		Pessoa gerenteResponsavel = pessoaService.buscarPessoaPorId(gerenteId);
 		projeto.setGerenteResponsavel(gerenteResponsavel);
 		projeto.setStatus(selectedStatus);
-
-		String classificacaoRisco = determinarClassificacaoRisco(projeto);
+		String classificacaoRisco = projetoService.determinarClassificacaoRisco(projeto);
 		projeto.setRisco(classificacaoRisco);
 		Projeto projetoExistente = projetoService.atualizarProjeto(projeto);
-
 		if (Objects.nonNull(projetoExistente)) {
 			attributes.addFlashAttribute("mensagem", "Pessoa atualizada com sucesso!");
 			return "redirect:/projetos/listar";
@@ -110,7 +109,7 @@ public class ProjetoController {
 			attributes.addFlashAttribute("mensagem_error", "Cadastre primeiro um funcionário e depois o projeto.");
 			return "redirect:/pessoas/novo";
 		}
-		String classificacaoRisco = determinarClassificacaoRisco(projeto);
+		String classificacaoRisco = projetoService.determinarClassificacaoRisco(projeto);
 		projeto.setRisco(classificacaoRisco);
 		NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 		String orcamentoFormatado = format.format(projeto.getOrcamento());
@@ -149,20 +148,4 @@ public class ProjetoController {
 		attributes.addFlashAttribute("mensagem_error", "Erro ao excluir projeto, id null.");
 		return "redirect:/projetos/listar";
 	}
-
-	private String determinarClassificacaoRisco(Projeto projeto) {
-		if ("Encerrado".equals(projeto.getStatus())) {
-			if (projeto.getDataFim() != null && projeto.getDataFim().before(projeto.getDataPrevisaoFim())) {
-				return "Baixo Risco";
-			} else if (projeto.getDataFim() != null || projeto.getDataFim().after(projeto.getDataPrevisaoFim())) {
-				return "Alto Risco";
-			}
-
-		} else if (projeto.getStatus().equals("Cancelado")) {
-			return "Baixo Risco";
-		}
-
-		return "Médio Risco";
-	}
-
 }

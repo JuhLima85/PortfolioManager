@@ -10,7 +10,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.portfolioManager.Entity.Pessoa;
 import br.com.portfolioManager.Entity.Projeto;
@@ -41,7 +40,8 @@ public class ProjetoService {
 			return "início";
 		}
 		if (dataPrevisaoFim.before(dataInicio)) {
-			return "previsão";		}
+			return "previsão";
+		}
 		if (projeto.getDataFim() != null) {
 			Date dataFim = dataSemHora(projeto.getDataFim());
 			if (dataFim != null && dataFim.before(dataInicio)) {
@@ -68,11 +68,11 @@ public class ProjetoService {
 
 	@Transactional
 	public void excluirProjeto(Long id) {
-		try {		
+		try {
 			projetoRepository.deleteById(id);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao remover projeto! " + e.getMessage());
-		}		
+		}
 	}
 
 	@Transactional
@@ -110,5 +110,52 @@ public class ProjetoService {
 		}
 
 		return gerentes;
+	}
+
+	public String determinarClassificacaoRisco(Projeto projeto) {
+		if ("Encerrado".equals(projeto.getStatus())) {
+			if (projeto.getDataFim() != null && projeto.getDataFim().before(projeto.getDataPrevisaoFim())) {
+				return "Baixo Risco";
+			} else if (projeto.getDataFim() != null || projeto.getDataFim().after(projeto.getDataPrevisaoFim())) {
+				return "Alto Risco";
+			}
+		} else if (projeto.getStatus().equals("Cancelado")) {
+			return "Baixo Risco";
+		}
+		double prazoTotal = calcularDiasEntreDatas(projeto.getDataInicio(), projeto.getDataPrevisaoFim());
+		double diasPercorridos = calcularDiasEntreDatas(projeto.getDataInicio(), new Date());
+		double diasRestantes = prazoTotal - diasPercorridos;
+		double percentualPrazoDisponivelAtual = (diasRestantes / prazoTotal) * 100;
+
+		String status = projeto.getStatus();
+		double percentualPrazoDisponivelPrevisto = 0;
+
+		if ("Planejado".equals(status)) {
+			percentualPrazoDisponivelPrevisto = 100;
+		} else if ("Em análise".equals(status)) {
+			percentualPrazoDisponivelPrevisto = 80;
+		} else if ("Análise realizada".equals(status)) {
+			percentualPrazoDisponivelPrevisto = 70;
+		} else if ("Análise aprovada".equals(status)) {
+			percentualPrazoDisponivelPrevisto = 60;
+		} else if ("Iniciado".equals(status)) {
+			percentualPrazoDisponivelPrevisto = 50;
+		} else if ("Em andamento".equals(status)) {
+			percentualPrazoDisponivelPrevisto = 25;
+		}
+
+		if (percentualPrazoDisponivelAtual > percentualPrazoDisponivelPrevisto) {
+			return "Baixo Risco";
+		} else if (percentualPrazoDisponivelAtual == percentualPrazoDisponivelPrevisto) {
+			return "Médio Risco";
+		} else {
+			return "Alto Risco";
+		}
+	}
+
+	private double calcularDiasEntreDatas(Date dataInicio, Date dataPrecisaoFim) {
+		long diferencaMilissegundos = dataPrecisaoFim.getTime() - dataInicio.getTime();
+		long diferencaDias = diferencaMilissegundos / (24 * 60 * 60 * 1000);
+		return diferencaDias;
 	}
 }
