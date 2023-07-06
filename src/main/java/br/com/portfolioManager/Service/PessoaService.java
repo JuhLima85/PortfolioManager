@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.caelum.stella.validation.CPFValidator;
 import br.com.caelum.stella.validation.InvalidStateException;
@@ -24,7 +23,7 @@ public class PessoaService {
 		this.service = service;
 	}
 
-	public String gravar(Pessoa pessoa, RedirectAttributes attributes) {
+	public String gravar(Pessoa pessoa) {
 		try {
 			if (service.existsByCpf(pessoa.getCpf())) {
 				return "CPF existente";
@@ -37,15 +36,10 @@ public class PessoaService {
 		return "Pessoa salva";
 	}
 
-	@Transactional
-	public String atualizarPessoa(Pessoa pessoaAtualizada, RedirectAttributes attributes) {
+	public void atualizarPessoa(Pessoa pessoaAtualizada) {
 		try {
-			if (service.existsByCpf(pessoaAtualizada.getCpf())) {
-				return "CPF existente";
-			}
 			Long pessoaId = pessoaAtualizada.getId();
 			Optional<Pessoa> pessoaExistente = service.findById(pessoaId);
-
 			if (pessoaExistente.isPresent()) {
 				Pessoa pessoa = pessoaExistente.get();
 				pessoa.setNome(pessoaAtualizada.getNome());
@@ -54,14 +48,9 @@ public class PessoaService {
 				pessoa.setFuncionario(pessoaAtualizada.isFuncionario());
 				service.save(pessoa);
 			}
-
 		} catch (Exception e) {
-
 			throw new IllegalArgumentException("Erro ao atualizar pessoa: " + e.getMessage());
 		}
-
-		return "Pessoa atualizada";
-
 	}
 
 	@Transactional
@@ -69,7 +58,7 @@ public class PessoaService {
 		try {
 			service.deleteById(pessoaId);
 		} catch (Exception e) {
-			throw new RuntimeException("Erro ao remover pessoa! ");
+			throw new IllegalArgumentException("Erro ao remover pessoa! " + e.getMessage());
 		}
 	}
 
@@ -81,17 +70,14 @@ public class PessoaService {
 	@Transactional(readOnly = true)
 	public List<Pessoa> listarTodasPessoas() {
 		List<Pessoa> pessoas = service.findAll();
-
 		if (pessoas.isEmpty()) {
 		}
-
 		return pessoas;
 	}
 
 	@Transactional(readOnly = true)
 	public Pessoa buscarPessoaPorId(Long id) {
 		Optional<Pessoa> optionalPessoa = service.findById(id);
-
 		if (optionalPessoa.isPresent()) {
 			return optionalPessoa.get();
 		} else {

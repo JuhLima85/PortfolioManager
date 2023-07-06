@@ -133,16 +133,30 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 			dataFimField.style.display = "none";
 		}
 	});
-	$(document).ready(function() {
-		$('#orcamentoProjeto').mask('000.000.000.000.000,00', {
-			reverse : true
+	
+	document.addEventListener('DOMContentLoaded', function() {
+		  formatarOrcamento();
 		});
-	});
 
+		function formatarOrcamento() {
+			var orcamentoInput = document.getElementById('orcamentoProjeto');
+			  orcamentoInput.value = orcamentoInput.value.replace(/([^0-9.])/g, '');
+			  orcamentoInput.value = orcamentoInput.value.replace(/\./g, ''); 
+			  orcamentoInput.value = orcamentoInput.value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.'); 
+			  orcamentoInput.value = orcamentoInput.value.replace(/,/g, '.'); 
+		}
+		
+		$(document).ready(function() {
+			$('#orcamentoProjeto').mask('000.000.000.000.000,00', {
+			    reverse : true
+			});
+			});
+	
 	document.querySelector('form').addEventListener('submit', function() {
-		var orcamentoInput = document.getElementById('orcamentoProjeto');
-		orcamentoInput.value = orcamentoInput.value.replace('.', '');
-		orcamentoInput.value = orcamentoInput.value.replace(',', '.');
+	    var orcamentoInput = document.getElementById('orcamentoProjeto');
+	    orcamentoInput.value = orcamentoInput.value.replace(/\./g, '');
+	    orcamentoInput.value = orcamentoInput.value.replace(',', '.'); 
 	});
+	
 </script>
 <jsp:include page="rodape.jsp" />

@@ -148,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		  orcamentoInput.value = orcamentoInput.value.replace(/,/g, '.'); 
 	}
 
-
  $(document).ready(function() {
 $('#orcamentoProjeto').mask('000.000.000.000.000,00', {
     reverse : true

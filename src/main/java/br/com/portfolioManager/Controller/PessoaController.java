@@ -68,25 +68,19 @@ public class PessoaController {
 	}
 
 	@PostMapping("/salvar")
-	public String criarPessoa(Pessoa pessoa, Model model, RedirectAttributes attributes) {
-		try {
-			if (!service.isCpfValido(pessoa.getCpf())) {
-				attributes.addFlashAttribute("pessoa", pessoa);
-				attributes.addFlashAttribute("mensagem_error", "CPF inválido");
-				return "redirect:/pessoas/novo";
-			}
-			String mensagemRetorno = service.gravar(pessoa, attributes);
-			if (mensagemRetorno.equals("CPF existente")) {
-				attributes.addFlashAttribute("pessoa", pessoa);
-				attributes.addFlashAttribute("mensagem_error", "CPF já cadastrado na base de dados!");
-				return "redirect:/pessoas/novo";
-			} else if (mensagemRetorno.equals("Pessoa salva")) {
-				attributes.addFlashAttribute("mensagem", "Pessoa salva com sucesso!");
-				return "redirect:/pessoas/listar";
-			}
-
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Erro ao cadastrar pessoa: " + e.getMessage());
+	public String criarPessoa(Pessoa pessoa, RedirectAttributes attributes) {
+		if (!service.isCpfValido(pessoa.getCpf())) {
+			attributes.addFlashAttribute("pessoa", pessoa);
+			attributes.addFlashAttribute("mensagem_error", "CPF inválido");
+			return "redirect:/pessoas/novo";
+		}
+		String mensagemRetorno = service.gravar(pessoa);
+		if (mensagemRetorno.equals("CPF existente")) {
+			attributes.addFlashAttribute("pessoa", pessoa);
+			attributes.addFlashAttribute("mensagem_error", "CPF já cadastrado na base de dados!");
+			return "redirect:/pessoas/novo";
+		} else if (mensagemRetorno.equals("Pessoa salva")) {
+			attributes.addFlashAttribute("mensagem", "Pessoa salva com sucesso!");
 		}
 		return "redirect:/pessoas/listar";
 	}
@@ -103,44 +97,27 @@ public class PessoaController {
 	}
 
 	@PostMapping("/atualizar")
-	public String atualizarPessoa(Pessoa pessoa, Model model, RedirectAttributes attributes) {
-		try {
-			if (!service.isCpfValido(pessoa.getCpf())) {
-				attributes.addFlashAttribute("pessoa", pessoa);
-				attributes.addFlashAttribute("mensagem_error", "CPF inválido");
-				return "redirect:/pessoas/novo?acao=atualizar";
-			}
-			String mensagemRetorno = service.atualizarPessoa(pessoa, attributes);
-			if (mensagemRetorno.equals("CPF existente")) {
-				attributes.addFlashAttribute("pessoa", pessoa);
-				attributes.addFlashAttribute("mensagem_error", "CPF já cadastrado na base de dados!");
-				return "redirect:/pessoas/novo?acao=atualizar";
-			} else if (mensagemRetorno.equals("Pessoa atualizada")) {
-				attributes.addFlashAttribute("mensagem", "Pessoa atualizada com sucesso!");
-				return "redirect:/pessoas/listar";
-			}
-
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Erro ao atualizar pessoa: " + e.getMessage());
+	public String atualizarPessoa(Pessoa pessoa, RedirectAttributes attributes) {
+		if (!service.isCpfValido(pessoa.getCpf())) {
+			attributes.addFlashAttribute("pessoa", pessoa);
+			attributes.addFlashAttribute("mensagem_error", "CPF inválido");
+			return "redirect:/pessoas/novo?acao=atualizar";
 		}
+		service.atualizarPessoa(pessoa);
+		attributes.addFlashAttribute("mensagem", "Pessoa atualizada com sucesso!");
 		return "redirect:/pessoas/listar";
 	}
 
 	@PostMapping("/remover/{id}")
 	public String excluirPessoa(@PathVariable Long id, RedirectAttributes attributes) {
-		try {
-			if (id != null) {
-				this.service.removerPessoa(id);
-				List<Pessoa> lista = this.service.listarTodasPessoas();
-				attributes.addFlashAttribute("pessoas", lista);
-				attributes.addFlashAttribute("mensagem", "Pessoa excluída com sucesso!");
-				return "redirect:/pessoas/listar";
-			}
-
-		} catch (Exception e) {
-			attributes.addFlashAttribute("mensagem_error", "Erro ao excluir pessoa: " + e.getMessage());
+		if (id != null) {
+			this.service.removerPessoa(id);
+			List<Pessoa> lista = this.service.listarTodasPessoas();
+			attributes.addFlashAttribute("pessoas", lista);
+			attributes.addFlashAttribute("mensagem", "Pessoa excluída com sucesso!");
+			return "redirect:/pessoas/listar";
 		}
-
+		attributes.addFlashAttribute("mensagem_error", "Erro ao excluir pessoa, id null.");
 		return "redirect:/pessoas/listar";
 	}
 }

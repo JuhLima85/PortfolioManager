@@ -95,13 +95,13 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 		return confirm("Tem certeza que deseja excluir o projeto '"
 				+ nomeProjeto + "'?");
 	}
-
+	
 	$(document).ready(function() {
 		$('.orcamentoProjeto').each(function() {
 			var orcamento = $(this).text();
 			var numeroFormatado = parseFloat(orcamento.replace(',', '.'));
 			$(this).text(numeroFormatado.toLocaleString('pt-BR', {
-				minimumFractionDigits : 2
+				 minimumFractionDigits : 2 
 			}));
 		});
 	});

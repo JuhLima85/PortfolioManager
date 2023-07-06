@@ -17,7 +17,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 <div class="container mt-3">
 	<div class="card card-custom-width">
 		<div class="card-body">
-			<h1 class="text-center">Cadastrar Pessoa</h1>
+			<h1 class="text-center">Cadastrar Pessoa</h1>				
 			<form:form id="formPessoa" method="POST"
 				action="/codedeving/pessoas/salvar"
 				modelAttribute="cadastrar-pessoa">
@@ -37,8 +37,9 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 				<div class="form-group">
 					<label for="nome">Data de Nascimento</label> <input type="text"
 						class="form-control" id="dataNascimentoPessoa"
-						name="dataNascimento" required="required" placeholder="DDMMAAAA"
+						name="dataNascimento" required="required" placeholder="DD/MM/AAAA"
 						value="<fmt:formatDate value="${pessoa.dataNascimento}" pattern="dd/MM/yyyy" />">
+						<small id="dataNascimentoError" class="form-text text-danger"></small>
 				</div>
 				<div class="form-group">
 					<label for="opcao">Funcionário?</label> <select name="funcionario"

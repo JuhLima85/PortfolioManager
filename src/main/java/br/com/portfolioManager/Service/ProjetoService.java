@@ -33,32 +33,26 @@ public class ProjetoService {
 	}
 
 	@Transactional
-	public String salvarProjeto(Projeto projeto, RedirectAttributes attributes) {
+	public String salvarProjeto(Projeto projeto) {
 		Date dataAtualSemHora = dataSemHora(new Date());
 		Date dataInicio = dataSemHora(projeto.getDataInicio());
 		Date dataPrevisaoFim = dataSemHora(projeto.getDataPrevisaoFim());
-
 		if (dataInicio.before(dataAtualSemHora)) {
 			return "início";
 		}
 		if (dataPrevisaoFim.before(dataInicio)) {
-
-			return "previsão";
-		}
+			return "previsão";		}
 		if (projeto.getDataFim() != null) {
 			Date dataFim = dataSemHora(projeto.getDataFim());
 			if (dataFim != null && dataFim.before(dataInicio)) {
-
 				return "fim";
 			}
 		}
-
 		try {
 			projetoRepository.save(projeto);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao cadastrar projeto: " + e.getMessage());
 		}
-
 		return "Projeto salvo";
 	}
 
@@ -74,20 +68,11 @@ public class ProjetoService {
 
 	@Transactional
 	public void excluirProjeto(Long id) {
-		Optional<Projeto> optionalProjeto = projetoRepository.findById(id);
-
-		if (optionalProjeto.isPresent()) {
-			Projeto projeto = optionalProjeto.get();
-
-			if ("Iniciado".equalsIgnoreCase(projeto.getStatus()) || "Em andamento".equalsIgnoreCase(projeto.getStatus())
-					|| "Encerrado".equalsIgnoreCase(projeto.getStatus())) {
-				throw new RuntimeException(
-						"Não é possível excluir um projeto com o status " + projeto.getStatus() + ".");
-			}
+		try {		
 			projetoRepository.deleteById(id);
-		} else {
-			throw new RuntimeException("Projeto não encontrado");
-		}
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Erro ao remover projeto! " + e.getMessage());
+		}		
 	}
 
 	@Transactional

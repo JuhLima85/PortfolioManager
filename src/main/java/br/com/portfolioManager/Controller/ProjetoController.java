@@ -67,8 +67,7 @@ public class ProjetoController {
 		if (projeto.isPresent()) {
 			NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 			String orcamentoFormatado = format.format(projeto.get().getOrcamento());
-			
-			
+
 			model.addAttribute("pessoas", this.pessoas);
 			model.addAttribute("projeto", projeto.get());
 			model.addAttribute("orcamentoFormatado", orcamentoFormatado);
@@ -100,67 +99,54 @@ public class ProjetoController {
 
 	@PostMapping("/salvar")
 	public String criarProjeto(Projeto projeto, @RequestParam(name = "gerentes") Optional<Long> gerenteIdOptional,
-			Model model, RedirectAttributes attributes) {
-
-		try {
-			Long gerenteId = null;
-			if (gerenteIdOptional.isPresent()) {
-				gerenteId = gerenteIdOptional.get();
-				Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
-				projeto.setGerenteResponsavel(gerente);
-			} else {
-				attributes.addFlashAttribute("projetos", projeto);
-				attributes.addFlashAttribute("mensagem_error", "Cadastre primeiro um funcionário e depois o projeto.");
-				return "redirect:/pessoas/novo";
-			}
-
-			String classificacaoRisco = determinarClassificacaoRisco(projeto);
-			projeto.setRisco(classificacaoRisco);
-
-			NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-			String orcamentoFormatado = format.format(projeto.getOrcamento());
-			model.addAttribute("orcamentoFormatado", orcamentoFormatado);
-
-			String mensagemRetorno = projetoService.salvarProjeto(projeto, attributes);
-			if (mensagemRetorno.equals("início")) {
-				attributes.addFlashAttribute("projeto", projeto);
-				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
-				attributes.addFlashAttribute("mensagem_error", "A data de início não pode ser anterior à data atual.");
-				return "redirect:/projetos/novo";
-			} else if (mensagemRetorno.equals("previsão")) {
-				attributes.addFlashAttribute("projeto", projeto);
-				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
-				attributes.addFlashAttribute("mensagem_error",
-						"A data de previsão de término não pode ser anterior à data de início.");
-				return "redirect:/projetos/novo";
-			} else if (mensagemRetorno.equals("fim")) {
-				attributes.addFlashAttribute("projeto", projeto);
-				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
-				attributes.addFlashAttribute("mensagem_error", "A data de fim não pode ser anterior à data de início.");
-				return "redirect:/projetos/novo";
-			} else if (mensagemRetorno.equals("Projeto salvo")) {
-				attributes.addFlashAttribute("mensagem", "Projeto salvo com sucesso!");
-				return "redirect:/projetos/novo";
-			}
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Erro ao cadastrar projeto: " + e.getMessage());
+			RedirectAttributes attributes) {
+		Long gerenteId = null;
+		if (gerenteIdOptional.isPresent()) {
+			gerenteId = gerenteIdOptional.get();
+			Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
+			projeto.setGerenteResponsavel(gerente);
+		} else {
+			attributes.addFlashAttribute("projetos", projeto);
+			attributes.addFlashAttribute("mensagem_error", "Cadastre primeiro um funcionário e depois o projeto.");
+			return "redirect:/pessoas/novo";
+		}
+		String classificacaoRisco = determinarClassificacaoRisco(projeto);
+		projeto.setRisco(classificacaoRisco);
+		NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+		String orcamentoFormatado = format.format(projeto.getOrcamento());
+		String mensagemRetorno = projetoService.salvarProjeto(projeto);
+		if (mensagemRetorno.equals("início")) {
+			attributes.addFlashAttribute("projeto", projeto);
+			attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
+			attributes.addFlashAttribute("mensagem_error", "A data de início não pode ser anterior à data atual.");
+			return "redirect:/projetos/novo";
+		} else if (mensagemRetorno.equals("previsão")) {
+			attributes.addFlashAttribute("projeto", projeto);
+			attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
+			attributes.addFlashAttribute("mensagem_error",
+					"A data de previsão de término não pode ser anterior à data de início.");
+			return "redirect:/projetos/novo";
+		} else if (mensagemRetorno.equals("fim")) {
+			attributes.addFlashAttribute("projeto", projeto);
+			attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
+			attributes.addFlashAttribute("mensagem_error", "A data de fim não pode ser anterior à data de início.");
+			return "redirect:/projetos/novo";
+		} else if (mensagemRetorno.equals("Projeto salvo")) {
+			attributes.addFlashAttribute("mensagem", "Projeto salvo com sucesso!");
 		}
 		return "redirect:/projetos/novo";
 	}
 
 	@PostMapping("/remover/{id}")
 	public String excluirProjeto(@PathVariable Long id, RedirectAttributes attributes) {
-		try {
-			if (id != null) {
-				projetoService.excluirProjeto(id);
-				List<Projeto> lista = projetoService.listarProjetos();
-				attributes.addFlashAttribute("projetos", lista);
-				attributes.addFlashAttribute("mensagem", "Projeto excluído com sucesso!");
-				return "redirect:/projetos/listar";
-			}
-		} catch (Exception e) {
-			attributes.addFlashAttribute("mensagem", "Erro ao excluir projeto: " + e.getMessage());
+		if (id != null) {
+			projetoService.excluirProjeto(id);
+			List<Projeto> lista = projetoService.listarProjetos();
+			attributes.addFlashAttribute("projetos", lista);
+			attributes.addFlashAttribute("mensagem", "Projeto excluído com sucesso!");
+			return "redirect:/projetos/listar";
 		}
+		attributes.addFlashAttribute("mensagem_error", "Erro ao excluir projeto, id null.");
 		return "redirect:/projetos/listar";
 	}
 
