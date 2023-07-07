@@ -25,6 +25,9 @@ public class PessoaService {
 
 	public String gravar(Pessoa pessoa) {
 		try {
+			if (!isCpfValido(pessoa.getCpf())) {				
+				return "CPF inválido";
+			}
 			if (service.existsByCpf(pessoa.getCpf())) {
 				return "CPF existente";
 			}
@@ -36,8 +39,11 @@ public class PessoaService {
 		return "Pessoa salva";
 	}
 
-	public void atualizarPessoa(Pessoa pessoaAtualizada) {
-		try {
+	public String atualizarPessoa(Pessoa pessoaAtualizada) {
+		try {			
+			if (!isCpfValido(pessoaAtualizada.getCpf())) {				
+				return "CPF inválido";
+			}
 			Long pessoaId = pessoaAtualizada.getId();
 			Optional<Pessoa> pessoaExistente = service.findById(pessoaId);
 			if (pessoaExistente.isPresent()) {
@@ -51,6 +57,7 @@ public class PessoaService {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao atualizar pessoa: " + e.getMessage());
 		}
+		return "Pessoa Atualizada";
 	}
 
 	@Transactional
@@ -63,14 +70,10 @@ public class PessoaService {
 	}
 
 	@Transactional(readOnly = true)
-	public Optional<Pessoa> listarPessoasPorProjeto(Long Id) {
-		return service.findById(Id);
-	}
-
-	@Transactional(readOnly = true)
 	public List<Pessoa> listarTodasPessoas() {
 		List<Pessoa> pessoas = service.findAll();
 		if (pessoas.isEmpty()) {
+			throw new IllegalArgumentException("Nenhuma pessoa encontrada.");
 		}
 		return pessoas;
 	}

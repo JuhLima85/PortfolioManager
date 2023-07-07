@@ -30,4 +30,12 @@ public class Pessoa implements Serializable {
 	private String cpf;
 	private boolean funcionario;
 
+	public Pessoa(String nome, Date dataNascimento, String cpf, boolean funcionario) {
+		super();
+		this.nome = nome;
+		this.dataNascimento = dataNascimento;
+		this.cpf = cpf;
+		this.funcionario = funcionario;
+	}
+
 }

@@ -1,8 +1,6 @@
 package br.com.portfolioManager.Controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -44,20 +42,6 @@ public class PessoaController {
 		return "listar-pessoas";
 	}
 
-	@GetMapping("/{id}")
-	public String buscarPessoa(@PathVariable Long id, Model model) {
-		List<Pessoa> lista = new ArrayList<>();
-		Optional<Pessoa> Pessoa = service.listarPessoasPorProjeto(id);
-		if (Pessoa.isPresent()) {
-			lista.add(Pessoa.get());
-			model.addAttribute("Pessoas", lista);
-			return "listar-pessoas";
-		} else {
-			model.addAttribute("Pessoas", lista);
-			return "listar-pessoas";
-		}
-	}
-
 	@GetMapping("/novo")
 	public String novaPessoa(@RequestParam(value = "acao", required = false) String acao) {
 		if (acao != null && acao.equals("atualizar")) {
@@ -69,13 +53,12 @@ public class PessoaController {
 
 	@PostMapping("/salvar")
 	public String criarPessoa(Pessoa pessoa, RedirectAttributes attributes) {
-		if (!service.isCpfValido(pessoa.getCpf())) {
+		String mensagemRetorno = service.gravar(pessoa);
+		if (mensagemRetorno.equals("CPF inválido")) {
 			attributes.addFlashAttribute("pessoa", pessoa);
 			attributes.addFlashAttribute("mensagem_error", "CPF inválido");
 			return "redirect:/pessoas/novo";
-		}
-		String mensagemRetorno = service.gravar(pessoa);
-		if (mensagemRetorno.equals("CPF existente")) {
+		} else if (mensagemRetorno.equals("CPF existente")) {
 			attributes.addFlashAttribute("pessoa", pessoa);
 			attributes.addFlashAttribute("mensagem_error", "CPF já cadastrado na base de dados!");
 			return "redirect:/pessoas/novo";
@@ -87,23 +70,19 @@ public class PessoaController {
 
 	@GetMapping("/editar/{id}")
 	public String editarPessoa(@PathVariable Long id, Model model) {
-		Optional<Pessoa> pessoa = service.listarPessoasPorProjeto(id);
-		if (pessoa.isPresent()) {
-			model.addAttribute("pessoa", pessoa.get());
-			return "editar-pessoa";
-		} else {
-			return "editar-pessoa";
-		}
+		Pessoa pessoa = service.buscarPessoaPorId(id);
+		model.addAttribute("pessoa", pessoa);
+		return "editar-pessoa";
 	}
 
 	@PostMapping("/atualizar")
 	public String atualizarPessoa(Pessoa pessoa, RedirectAttributes attributes) {
-		if (!service.isCpfValido(pessoa.getCpf())) {
+		String mensagemRetorno = service.atualizarPessoa(pessoa);
+		if (mensagemRetorno.equals("CPF inválido")) {
 			attributes.addFlashAttribute("pessoa", pessoa);
 			attributes.addFlashAttribute("mensagem_error", "CPF inválido");
 			return "redirect:/pessoas/novo?acao=atualizar";
 		}
-		service.atualizarPessoa(pessoa);
 		attributes.addFlashAttribute("mensagem", "Pessoa atualizada com sucesso!");
 		return "redirect:/pessoas/listar";
 	}
