@@ -102,7 +102,7 @@ public class PessoaController {
 			attributes.addFlashAttribute("mensagem_error", "CPF inválido");
 			return "redirect:/pessoas/novo?acao=atualizar";
 		}
-		if (mensagemRetorno.equals("gerente")) {
+		if (mensagemRetorno.equals("nao pode atualizar")) {
 			attributes.addFlashAttribute("pessoa", pessoa);
 			attributes.addFlashAttribute("mensagem_error",
 					"Essa pessoa é gerente em algum projeto. Por favor, remova-a do projeto antes de fazer a edição.");

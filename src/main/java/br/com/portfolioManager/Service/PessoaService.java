@@ -19,19 +19,19 @@ import br.com.portfolioManager.Repository.PessoaRepository;
 @Service
 public class PessoaService {
 
-	private PessoaRepository service;
+	private PessoaRepository pessoaRepository;
 	private ApplicationContext applicationContext;
 
 	@Autowired
-	public PessoaService(PessoaRepository service) {
-		this.service = service;
+	public PessoaService(PessoaRepository pessoaRepository) {
+		this.pessoaRepository = pessoaRepository;
 	}
 
 	@Autowired
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
-
+	
 	@Transactional(readOnly = true)
 	public boolean isGerenteResponsavel(Long idPessoa) {
 		boolean isGerente = false;
@@ -44,7 +44,7 @@ public class PessoaService {
 				break;
 			}
 		}
-		return isGerente;
+		return isGerente;		
 	}
 
 	@Transactional
@@ -53,13 +53,13 @@ public class PessoaService {
 			if (!isCpfValido(pessoa.getCpf())) {
 				return "CPF invalido";
 			}
-			if (service.existsByCpf(pessoa.getCpf())) {
+			if (pessoaRepository.existsByCpf(pessoa.getCpf())) {
 				return "CPF existente";
 			}
 			if(pessoa.getDataNascimento() == null) {
 				return null;
 			}
-			service.save(pessoa);
+			pessoaRepository.save(pessoa);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao cadastrar pessoa: " + e.getMessage());
 		}
@@ -74,18 +74,18 @@ public class PessoaService {
 			}
 
 			if (isGerenteResponsavel(pessoaAtualizada.getId())) {
-				return "gerente";
+				return "nao pode atualizar";
 			}
 			Long pessoaId = pessoaAtualizada.getId();
-			Optional<Pessoa> pessoaExistente = service.findById(pessoaId);
+			Optional<Pessoa> pessoaExistente = pessoaRepository.findById(pessoaId);
 			if (pessoaExistente.isPresent()) {
 				Pessoa pessoa = pessoaExistente.get();
 				pessoa.setNome(pessoaAtualizada.getNome());
 				pessoa.setCpf(pessoaAtualizada.getCpf());
 				pessoa.setDataNascimento(pessoaAtualizada.getDataNascimento());
 				pessoa.setFuncionario(pessoaAtualizada.isFuncionario());
-				service.save(pessoa);
-			}
+				pessoaRepository.save(pessoa);					
+			} 
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao atualizar pessoa: " + e.getMessage());
 		}
@@ -96,9 +96,8 @@ public class PessoaService {
 	public void removerPessoa(Long pessoaId) {
 		try {
 			if (pessoaId != null) {
-				service.deleteById(pessoaId);
+				pessoaRepository.deleteById(pessoaId);
 			}
-
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao remover pessoa: " + e.getMessage());
 		}
@@ -106,7 +105,7 @@ public class PessoaService {
 
 	@Transactional(readOnly = true)
 	public List<Pessoa> listarTodasPessoas() {
-		List<Pessoa> pessoas = service.findAll();
+		List<Pessoa> pessoas = pessoaRepository.findAll();
 		try {
 			return pessoas;
 		} catch (Exception e) {
@@ -128,7 +127,7 @@ public class PessoaService {
 
 	@Transactional(readOnly = true)
 	public Pessoa buscarPessoaPorId(Long id) {
-		Optional<Pessoa> optionalPessoa = service.findById(id);
+		Optional<Pessoa> optionalPessoa = pessoaRepository.findById(id);
 		if (optionalPessoa.isPresent()) {
 			return optionalPessoa.get();
 		} else {
