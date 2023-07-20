@@ -34,12 +34,13 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 						value="${pessoa.cpf}" class="form-control" id="cpfPessoa"
 						name="cpf">
 				</div>
+				
 				<div class="form-group">
 					<label for="nome">Data de Nascimento</label> <input type="text"
 						value="<fmt:formatDate value="${pessoa.dataNascimento}" pattern="dd/MM/yyyy" />"
 						class="form-control" id="dataNascimentoPessoa"
-						name="dataNascimento">
-				</div>
+						name="dataNascimento" placeholder="DD/MM/AAAA">
+				</div>				
 				<div class="form-group">
 					<label for="funcionarioPessoa">Funcionário?</label> <select
 						class="form-control" id="funcionarioPessoa" name="funcionario">

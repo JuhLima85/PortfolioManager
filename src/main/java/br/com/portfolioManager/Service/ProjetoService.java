@@ -10,6 +10,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import br.com.portfolioManager.Entity.Pessoa;
 import br.com.portfolioManager.Entity.Projeto;
@@ -18,42 +21,80 @@ import br.com.portfolioManager.Repository.ProjetoRepository;
 @Service
 public class ProjetoService {
 
+	private final ProjetoRepository projetoRepository;
+	private final PessoaService pessoaService;
+
 	@Autowired
-	private ProjetoRepository projetoRepository;
+	public ProjetoService(ProjetoRepository projetoRepository, PessoaService pessoaService) {
+		this.projetoRepository = projetoRepository;
+		this.pessoaService = pessoaService;
+	}
 
 	@Transactional(readOnly = true)
 	public List<Projeto> listarProjetos() {
-		return projetoRepository.findAll();
+		List<Projeto> lista = projetoRepository.findAll();
+		try {
+			if (!lista.isEmpty()) {
+				for (Projeto projeto : lista) {
+					String classificacaoRisco = determinarClassificacaoRisco(projeto);
+					projeto.setRisco(classificacaoRisco);
+				}
+			}
+			return lista;
+		} catch (Exception e) {
+			throw new NoSuchElementException(e.getMessage());
+		}
 	}
 
 	@Transactional(readOnly = true)
-	public Optional<Projeto> buscarProjeto(Long id) {
-		return projetoRepository.findById(id);
-	}
-
+	public Projeto buscarProjeto(Long id) {
+		Optional<Projeto> optionalProjeto = projetoRepository.findById(id);
+		if (optionalProjeto.isPresent()) {
+			return optionalProjeto.get();
+		}
+		throw new NoSuchElementException("Projeto não encontrado");
+	}	
+	
 	@Transactional
 	public String salvarProjeto(Projeto projeto) {
-		Date dataAtualSemHora = dataSemHora(new Date());
-		Date dataInicio = dataSemHora(projeto.getDataInicio());
-		Date dataPrevisaoFim = dataSemHora(projeto.getDataPrevisaoFim());
-		if (dataInicio.before(dataAtualSemHora)) {
-			return "início";
-		}
-		if (dataPrevisaoFim.before(dataInicio)) {
-			return "previsão";
-		}
-		if (projeto.getDataFim() != null) {
-			Date dataFim = dataSemHora(projeto.getDataFim());
-			if (dataFim != null && dataFim.before(dataInicio)) {
-				return "fim";
+		try {			
+			String classificacaoRisco = determinarClassificacaoRisco(projeto);
+			projeto.setRisco(classificacaoRisco);
+			String dataValidada = validarDatasProjeto(projeto);
+			if (!dataValidada.equals("sucesso")) {
+				return dataValidada;
 			}
-		}
-		try {
 			projetoRepository.save(projeto);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao cadastrar projeto: " + e.getMessage());
 		}
 		return "Projeto salvo";
+	}
+	
+	public String verificaSetemFuncionario(Projeto projeto) {
+		List<Pessoa> funcionarios = pessoaService.listarFuncionario();		
+			if (funcionarios.size() > 0) {
+				return "funcionario";			
+		} else if(funcionarios.isEmpty()) {
+			return "cadastre";
+		}
+		return null;
+	}
+	
+	public String validarDatasProjeto(Projeto projeto) {
+		Date dataInicio = dataSemHora(projeto.getDataInicio());
+		Date dataPrevisaoFim = dataSemHora(projeto.getDataPrevisaoFim());
+
+		if (dataPrevisaoFim.before(dataInicio)) {
+			return "previsao";
+		}
+		if (projeto.getDataFim() != null) {
+			Date dataFim = dataSemHora(projeto.getDataFim());
+			if (dataFim != null && (dataFim.before(dataInicio) || dataFim.after(new Date()))) {
+				return "fim";
+			}
+		}
+		return "sucesso";
 	}
 
 	public Date dataSemHora(Date data) {
@@ -66,17 +107,42 @@ public class ProjetoService {
 		return calendar.getTime();
 	}
 
+	public String isDataErro(Projeto projeto, BindingResult bindingResult) {
+		String isErroData = "sem erro";
+		if (bindingResult.hasErrors()) {
+			for (FieldError error : bindingResult.getFieldErrors()) {
+	            if (error.getField().equals("dataInicio") && error.getCode().equals("typeMismatch")) {
+	            	isErroData = "Formato de data de início está incorreto. Por favor, insira uma data válida no formato DD/MM/AAAA.)";
+	                return isErroData;
+	            }
+	        }			
+		}		
+		return isErroData;
+	}
+
 	@Transactional
 	public void excluirProjeto(Long id) {
 		try {
-			projetoRepository.deleteById(id);
+			if (id != null) {
+				projetoRepository.deleteById(id);
+			}
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao remover projeto! " + e.getMessage());
 		}
 	}
 
 	@Transactional
-	public Projeto atualizarProjeto(Projeto projetoAtualizado) {
+	public String atualizarProjeto(Projeto projetoAtualizado, @RequestParam("gerentes") Long gerenteId,
+			@RequestParam("selectedStatus") String selectedStatus) {
+		Pessoa gerenteResponsavel = pessoaService.buscarPessoaPorId(gerenteId);
+		projetoAtualizado.setGerenteResponsavel(gerenteResponsavel);
+		projetoAtualizado.setStatus(selectedStatus);		
+		String classificacaoRisco = determinarClassificacaoRisco(projetoAtualizado);
+		projetoAtualizado.setRisco(classificacaoRisco);
+		String dataValidada = validarDatasProjeto(projetoAtualizado);
+		if (!dataValidada.equals("sucesso")) {
+			return dataValidada;
+		}
 		Long projetoId = projetoAtualizado.getId();
 		Optional<Projeto> projetoExistente = projetoRepository.findById(projetoId);
 
@@ -91,24 +157,23 @@ public class ProjetoService {
 			projeto.setOrcamento(projetoAtualizado.getOrcamento());
 			projeto.setRisco(projetoAtualizado.getRisco());
 			projeto.setGerenteResponsavel(projetoAtualizado.getGerenteResponsavel());
-			return projetoRepository.save(projeto);
+			projetoRepository.save(projeto);
+			return "atualizado";
 		} else {
 			throw new NoSuchElementException("Projeto não encontrado");
 		}
 	}
 
-	@Transactional
-	public List<Pessoa> isGerenteResponsavel() {
+	@Transactional(readOnly = true)
+	public List<Pessoa> listaGerenteResponsavel() {
 		List<Projeto> projetos = listarProjetos();
 		List<Pessoa> gerentes = new ArrayList<>();
-
 		for (Projeto projeto : projetos) {
 			Pessoa gerenteResponsavel = projeto.getGerenteResponsavel();
 			if (gerenteResponsavel != null && !gerentes.contains(gerenteResponsavel)) {
 				gerentes.add(gerenteResponsavel);
 			}
 		}
-
 		return gerentes;
 	}
 

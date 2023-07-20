@@ -35,10 +35,13 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 								value="${projeto.descricao != null ? projeto.descricao : ''}">
 						</div>
 					</div>
+
 					<div class="col-md-2 mb-3">
 						<div class="form-group">
 							<label for="opcao">Gerente Responsável</label> <select
 								class="form-control" name="gerentes" id="gerentes">
+								<option value=""
+									${projeto.gerenteResponsavel == null ? 'selected' : ''}>Selecione</option>
 								<c:forEach items="${pessoas}" var="proximo">
 									<c:if test="${proximo.funcionario}">
 										<option value="${proximo.id}"
@@ -49,7 +52,6 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 							</select>
 						</div>
 					</div>
-
 				</div>
 				<div class="form-row">
 					<div class="col-md-2 mb-3">
@@ -85,9 +87,11 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 								value="${orcamentoFormatado}">
 						</div>
 					</div>
+
 					<div class="form-group">
 						<label for="statusProjeto">Status</label> <select
-							class="form-control" id="statusProjeto" name="status">
+							class="form-control" id="statusProjeto" name="status" required="required">
+							<option value="" ${projeto.status == null ? 'selected' : ''}>Selecione</option>
 							<option value="Planejado"
 								${projeto.status == 'Planejado' ? 'selected' : ''}>Planejado</option>
 							<option value="Em análise"
@@ -122,41 +126,64 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script
 	src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-<script>
-	var statusProjeto = document.getElementById("statusProjeto");
-	var dataFimField = document.getElementById("dataFimField");
+<script>	
 
-	statusProjeto.addEventListener("change", function() {
-		if (statusProjeto.value === "Encerrado") {
-			dataFimField.style.display = "block";
-		} else {
-			dataFimField.style.display = "none";
-		}
-	});
-	
+document.addEventListener("DOMContentLoaded", function() {
+    var statusProjeto = document.getElementById("statusProjeto");
+    var dataFimField = document.getElementById("dataFimField");
+    
+    function verificarStatusProjeto() {
+        if (statusProjeto.value === "Encerrado") {
+            dataFimField.style.display = "block";
+            statusProjeto.classList.add("encerrado");
+        } else {
+            dataFimField.style.display = "none";
+            statusProjeto.classList.remove("encerrado");
+        }
+    }
+    
+    verificarStatusProjeto();
+    statusProjeto.addEventListener("change", verificarStatusProjeto);
+    
+    statusProjeto.addEventListener("change", function() {
+    	  if (statusProjeto.value !== "Encerrado") {
+    	    document.getElementById("dataFim").value = "";
+    	  }
+    	});
+
+}); 	
+
 	document.addEventListener('DOMContentLoaded', function() {
-		  formatarOrcamento();
-		});
-
-		function formatarOrcamento() {
-			var orcamentoInput = document.getElementById('orcamentoProjeto');
-			  orcamentoInput.value = orcamentoInput.value.replace(/([^0-9.])/g, '');
-			  orcamentoInput.value = orcamentoInput.value.replace(/\./g, ''); 
-			  orcamentoInput.value = orcamentoInput.value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.'); 
-			  orcamentoInput.value = orcamentoInput.value.replace(/,/g, '.'); 
-		}
-		
-		$(document).ready(function() {
-			$('#orcamentoProjeto').mask('000.000.000.000.000,00', {
-			    reverse : true
-			});
-			});
-	
-	document.querySelector('form').addEventListener('submit', function() {
-	    var orcamentoInput = document.getElementById('orcamentoProjeto');
-	    orcamentoInput.value = orcamentoInput.value.replace(/\./g, '');
-	    orcamentoInput.value = orcamentoInput.value.replace(',', '.'); 
+		formatarOrcamento();
 	});
-	
+
+	function formatarOrcamento() {
+		var orcamentoInput = document.getElementById('orcamentoProjeto');
+		orcamentoInput.value = orcamentoInput.value.replace(/([^0-9.])/g, '');
+		orcamentoInput.value = orcamentoInput.value.replace(/\./g, '');
+		orcamentoInput.value = orcamentoInput.value.replace(
+				/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+		orcamentoInput.value = orcamentoInput.value.replace(/,/g, '.');
+	}
+
+	$(document).ready(function() {
+		$('#orcamentoProjeto').mask('000.000.000.000.000,00', {
+			reverse : true
+		});
+	});
+
+	document.querySelector('form').addEventListener('submit', function() {
+		var orcamentoInput = document.getElementById('orcamentoProjeto');
+		orcamentoInput.value = orcamentoInput.value.replace(/\./g, '');
+		orcamentoInput.value = orcamentoInput.value.replace(',', '.');
+	});
+
+	const gerentesSelect = document.getElementById('gerentes');
+
+	gerentesSelect.addEventListener('change', function() {
+		if (gerentesSelect.value === "") {
+			gerentesSelect.options[0].selected = true;
+		}
+	});
 </script>
 <jsp:include page="rodape.jsp" />
