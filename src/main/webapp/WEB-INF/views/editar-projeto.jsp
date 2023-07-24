@@ -26,32 +26,32 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 				<div class="form-group">
 					<label for="nome">Nome</label> <input type="text"
 						value="${projeto.nome}" class="form-control" id="nomeProjeto"
-						name="nome">
+						name="nome" required="required">
 				</div>
 				<div class="form-group">
 					<label for="nome">Descrição</label> <input type="text"
 						value="${projeto.descricao}" class="form-control"
-						id="descricaoProjeto" name="descricao">
+						id="descricaoProjeto" name="descricao" required="required">
 				</div>
 				<div class="form-group">
 					<label for="nome">Data de Início</label> <input type="text"
 						value="<fmt:formatDate value="${projeto.dataInicio}" pattern="dd/MM/yyyy" />"
-						class="form-control" id="dataInicioProjeto" name="dataInicio">
+						class="form-control" id="dataInicioProjeto" name="dataInicio" required="required" placeholder="DD/MM/AAAA">
 				</div>
 				<div class="form-group" id="dataFimField" style="display: none;">
 					<label for="nome">Data do Término</label> <input type="text"
 						value="<fmt:formatDate value="${projeto.dataFim}" pattern="dd/MM/yyyy" />"
-						class="form-control" id="dataFimProjeto" name="dataFim">
+						class="form-control" id="dataFimProjeto" name="dataFim" placeholder="DD/MM/AAAA">
 				</div>
 				<div class="form-group">
 					<label for="nome">Previsão de Término</label> <input type="text"
 						value="<fmt:formatDate value="${projeto.dataPrevisaoFim}" pattern="dd/MM/yyyy" />"
 						class="form-control" id="dataPrevisaoFimProjeto"
-						name="dataPrevisaoFim">
+						name="dataPrevisaoFim" required="required" placeholder="DD/MM/AAAA">
 				</div>
 				<div class="form-group">
 					<label for="nome">Orçamento</label> <input type="text"
-						class="form-control" id="orcamentoProjeto" name="orcamento"
+						class="form-control" id="orcamentoProjeto" name="orcamento" required="required"
 						value="${orcamentoFormatado}">
 				</div>
 				<div class="form-group">

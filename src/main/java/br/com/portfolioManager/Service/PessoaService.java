@@ -1,6 +1,7 @@
 package br.com.portfolioManager.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -59,6 +60,9 @@ public class PessoaService {
 			if(pessoa.getDataNascimento() == null) {
 				return null;
 			}
+			 if (pessoa.getDataNascimento() != null && pessoa.getDataNascimento().after(new Date())) {
+		            return "Data maior que a atual";
+		        }
 			pessoaRepository.save(pessoa);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Erro ao cadastrar pessoa: " + e.getMessage());
@@ -72,7 +76,9 @@ public class PessoaService {
 			if (!isCpfValido(pessoaAtualizada.getCpf())) {
 				return "CPF invalido";
 			}
-
+			if (pessoaAtualizada.getDataNascimento() != null && pessoaAtualizada.getDataNascimento().after(new Date())) {
+	            return "Data maior que a atual";
+	        }
 			if (isGerenteResponsavel(pessoaAtualizada.getId())) {
 				return "nao pode atualizar";
 			}
@@ -144,5 +150,5 @@ public class PessoaService {
 		} catch (InvalidStateException e) {
 			return false;
 		}
-	}
+	}	
 }

@@ -71,7 +71,12 @@ public class PessoaController {
 			attributes.addFlashAttribute("pessoa", pessoa);
 			attributes.addFlashAttribute("mensagem_error", "CPF já cadastrado na base de dados.");
 			return "redirect:/pessoas/novo";
-		} else if (mensagemRetorno.equals("Pessoa salva")) {
+		}  else if (mensagemRetorno.equals("Data maior que a atual")) {
+			attributes.addFlashAttribute("pessoa", pessoa);
+			attributes.addFlashAttribute("mensagem_error", "Data de nascimento não pode ser maior que a data atual.");
+			return "redirect:/pessoas/novo";
+		} 		
+		else if (mensagemRetorno.equals("Pessoa salva")) {
 			attributes.addFlashAttribute("mensagem", "Pessoa salva com sucesso!");
 		}
 		return "redirect:/pessoas/listar";
@@ -101,7 +106,11 @@ public class PessoaController {
 			attributes.addFlashAttribute("pessoa", pessoa);
 			attributes.addFlashAttribute("mensagem_error", "CPF inválido");
 			return "redirect:/pessoas/novo?acao=atualizar";
-		}
+		} else if (mensagemRetorno.equals("Data maior que a atual")) {
+			attributes.addFlashAttribute("pessoa", pessoa);
+			attributes.addFlashAttribute("mensagem_error", "Data de nascimento não pode ser maior que a data atual.");
+			return "redirect:/pessoas/novo?acao=atualizar";
+		}		
 		if (mensagemRetorno.equals("nao pode atualizar")) {
 			attributes.addFlashAttribute("pessoa", pessoa);
 			attributes.addFlashAttribute("mensagem_error",

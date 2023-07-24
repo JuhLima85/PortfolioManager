@@ -6,8 +6,7 @@ class ProjetoPortFolioApplicationTests {
 
 	@Test
 	void contextLoads() {
-
-		System.out.println("oi");
+		
 	}
 
 }

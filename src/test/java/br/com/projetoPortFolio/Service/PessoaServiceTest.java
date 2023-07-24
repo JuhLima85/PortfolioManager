@@ -36,9 +36,8 @@ class PessoaServiceTest {
 
 	@Mock
 	private PessoaRepository pessoaRepository;
-
-	Date dataNascimento = new Date(1960 - 10 - 10);
-	Pessoa pessoa = new Pessoa("Maria José", dataNascimento, "01439869103", true);
+	
+	Pessoa pessoa = new Pessoa("Maria José", new Date(1990 - 5 - 15), "01439869103", true);
 
 	@Test
 	@DisplayName("Deve salvar pessoa e retornar 'Pessoa salva'")
@@ -53,10 +52,10 @@ class PessoaServiceTest {
 	@Test
 	@DisplayName("Deve retornar mensagem de CPF inválido")
 	void gravarComCPFInvalido() {
-		Pessoa pessoa = new Pessoa("Maria José", dataNascimento, "222222222222", true);
-		String resultado = pessoaService.gravar(pessoa);
+		Pessoa pessoaComCpfInvalido = new Pessoa("Maria José", new Date(1990 - 5 - 15), "222222222222", true);
+		String resultado = pessoaService.gravar(pessoaComCpfInvalido);
 		assertEquals("CPF invalido", resultado);
-		Mockito.verify(pessoaRepository, Mockito.never()).existsByCpf(pessoa.getCpf());
+		Mockito.verify(pessoaRepository, Mockito.never()).existsByCpf(pessoaComCpfInvalido.getCpf());
 		Mockito.verify(pessoaRepository, Mockito.never()).save(Mockito.any());
 	}
 
@@ -87,7 +86,7 @@ class PessoaServiceTest {
 		String novoCpf = "01439869103";
 		Date novaDataNascimento = new Date(1980 - 7 - 11);
 		boolean novoFuncionario = true;
-		Pessoa pessoaExistente = new Pessoa("Maria José", dataNascimento, "01439869103", true);
+		Pessoa pessoaExistente = new Pessoa("Maria José", new Date(1990 - 5 - 15), "01439869103", true);
 		pessoaExistente.setId(pessoaId);
 		Pessoa pessoaAtualizada = new Pessoa(novoNome, novaDataNascimento, novoCpf, novoFuncionario);
 		pessoaAtualizada.setId(pessoaId);
@@ -129,7 +128,7 @@ class PessoaServiceTest {
 		String novoCpf = "01439869103";
 		Date novaDataNascimento = new Date(1980 - 7 - 11);
 		boolean novoFuncionario = true;
-		Pessoa pessoaExistente = new Pessoa("Maria José", dataNascimento, "01439869103", true);
+		Pessoa pessoaExistente = new Pessoa("Maria José", new Date(1990 - 5 - 15), "01439869103", true);
 		pessoaExistente.setId(pessoaId);
 		Pessoa pessoaAtualizada = new Pessoa(novoNome, novaDataNascimento, novoCpf, novoFuncionario);
 		pessoaAtualizada.setId(pessoaId);
@@ -199,8 +198,7 @@ class PessoaServiceTest {
 
 	@Test
 	@DisplayName("Deve retornar apenas funcionários quando existem funcionários no banco de dados")
-	void deveRetornarApenasFuncionariosQuandoExistemFuncionarios() {
-		// Criação de dados de exemplo
+	void deveRetornarApenasFuncionariosQuandoExistemFuncionarios() {		
 		Pessoa funcionario1 = new Pessoa("João", new Date(), "12345678900", true);
 		Pessoa funcionario2 = new Pessoa("Maria", new Date(), "98765432100", true);
 		List<Pessoa> pessoas = Arrays.asList(funcionario1, funcionario2);

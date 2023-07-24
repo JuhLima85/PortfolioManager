@@ -67,27 +67,43 @@ public class ProjetoController {
 	}
 
 	@PostMapping("/atualizar")
-	public String atualizarProjeto(Projeto projeto, @RequestParam("gerentes") Long gerenteId,
-			@RequestParam("selectedStatus") String selectedStatus, RedirectAttributes attributes) {
+	public String atualizarProjeto(Projeto projeto, BindingResult bindingResult,
+			@RequestParam("gerentes") Long gerenteId, @RequestParam("selectedStatus") String selectedStatus,
+			RedirectAttributes attributes) {
 		NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 		String orcamentoFormatado = format.format(projeto.getOrcamento());
-		String mensagemRetorno = projetoService.atualizarProjeto(projeto, gerenteId, selectedStatus);
-		if (mensagemRetorno.equals("previsao")) {
-			attributes.addFlashAttribute("projeto", projeto);
-			attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
-			attributes.addFlashAttribute("mensagem_error",
-					"A data de previsão de término não pode ser anterior à data de início.");
-			return "redirect:/projetos/novo?acao=atualizar";
-		} else if (mensagemRetorno.equals("fim")) {
-			attributes.addFlashAttribute("projeto", projeto);
-			attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
-			attributes.addFlashAttribute("mensagem_error",
-					"Inconsistência entre as datas informadas. Verifique se a data de término é anterior à data de início ou posterior à data atual.");
-			return "redirect:/projetos/novo?acao=atualizar";
-		} else if (mensagemRetorno.equals("atualizado")) {
-			attributes.addFlashAttribute("mensagem", "Projeto atualizado com sucesso!");
+		if (gerenteId != null && selectedStatus != null) {
+			Pessoa gerenteResponsavel = pessoaService.buscarPessoaPorId(gerenteId);
+			projeto.setGerenteResponsavel(gerenteResponsavel);
+			projeto.setStatus(selectedStatus);
+			if (bindingResult.hasErrors()) {
+				attributes.addFlashAttribute("projeto", projeto);
+				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
+				attributes.addFlashAttribute("mensagem_error",
+						"Formato de data incorreto. Por favor, insira uma data válida no formato DD/MM/AAAA.");
+				return "redirect:/projetos/novo?acao=atualizar";
+			}
+			String mensagemRetorno = projetoService.atualizarProjeto(projeto, gerenteId, selectedStatus);
+			if (mensagemRetorno.equals("previsao")) {
+				attributes.addFlashAttribute("projeto", projeto);
+				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
+				attributes.addFlashAttribute("mensagem_error",
+						"A data de previsão de término não pode ser anterior à data de início.");
+				return "redirect:/projetos/novo?acao=atualizar";
+			} else if (mensagemRetorno.equals("fim")) {
+				attributes.addFlashAttribute("projeto", projeto);
+				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
+				attributes.addFlashAttribute("mensagem_error",
+						"Inconsistência entre as datas informadas. Verifique se a data de término é anterior à data de início ou posterior à data atual.");
+				return "redirect:/projetos/novo?acao=atualizar";
+			} else if (mensagemRetorno.equals("atualizado")) {
+				attributes.addFlashAttribute("mensagem", "Projeto atualizado com sucesso!");
+			}
+			return "redirect:/projetos/listar";
+
+		} else {
+			throw new IllegalArgumentException("Erro ao remover projeto!");
 		}
-		return "redirect:/projetos/listar";
 	}
 
 	@PostMapping("/salvar")
@@ -100,15 +116,16 @@ public class ProjetoController {
 			gerenteId = gerenteIdOptional.get();
 			Pessoa gerente = pessoaService.buscarPessoaPorId(gerenteId);
 			projeto.setGerenteResponsavel(gerente);
-		} else if (projetoService.verificaSetemFuncionario(projeto) != null) {
-			String retorno = projetoService.verificaSetemFuncionario(projeto);
+		} else if (projetoService.verificaSetemFuncionario() != null) {
+			String retorno = projetoService.verificaSetemFuncionario();
 			if (retorno.equals("funcionario")) {
 				attributes.addFlashAttribute("projeto", projeto);
 				attributes.addFlashAttribute("orcamentoFormatado", orcamentoFormatado);
 				attributes.addFlashAttribute("mensagem_error", "Selecione um gerente da lista.");
 				return "redirect:/projetos/novo";
 			} else if (retorno.equals("cadastre")) {
-				attributes.addFlashAttribute("mensagem_error", "Cadastre primeiro um funcionário e depois o projeto.");
+				attributes.addFlashAttribute("mensagem_error",
+						"Cadastre primeiro uma pessoa que seja funcionário e depois o projeto.");
 				return "redirect:/projetos/novo";
 			}
 		}

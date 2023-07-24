@@ -10,8 +10,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import br.com.portfolioManager.Entity.Pessoa;
@@ -53,11 +51,11 @@ public class ProjetoService {
 			return optionalProjeto.get();
 		}
 		throw new NoSuchElementException("Projeto não encontrado");
-	}	
-	
+	}
+
 	@Transactional
 	public String salvarProjeto(Projeto projeto) {
-		try {			
+		try {
 			String classificacaoRisco = determinarClassificacaoRisco(projeto);
 			projeto.setRisco(classificacaoRisco);
 			String dataValidada = validarDatasProjeto(projeto);
@@ -70,17 +68,17 @@ public class ProjetoService {
 		}
 		return "Projeto salvo";
 	}
-	
-	public String verificaSetemFuncionario(Projeto projeto) {
-		List<Pessoa> funcionarios = pessoaService.listarFuncionario();		
-			if (funcionarios.size() > 0) {
-				return "funcionario";			
-		} else if(funcionarios.isEmpty()) {
+
+	public String verificaSetemFuncionario() {
+		List<Pessoa> funcionarios = pessoaService.listarFuncionario();
+		if (funcionarios.size() > 0) {
+			return "funcionario";
+		} else if (funcionarios.isEmpty()) {
 			return "cadastre";
 		}
-		return null;
+		throw new IllegalArgumentException("Erro ao verificar se tem funcionário: ");
 	}
-	
+
 	public String validarDatasProjeto(Projeto projeto) {
 		Date dataInicio = dataSemHora(projeto.getDataInicio());
 		Date dataPrevisaoFim = dataSemHora(projeto.getDataPrevisaoFim());
@@ -107,19 +105,6 @@ public class ProjetoService {
 		return calendar.getTime();
 	}
 
-	public String isDataErro(Projeto projeto, BindingResult bindingResult) {
-		String isErroData = "sem erro";
-		if (bindingResult.hasErrors()) {
-			for (FieldError error : bindingResult.getFieldErrors()) {
-	            if (error.getField().equals("dataInicio") && error.getCode().equals("typeMismatch")) {
-	            	isErroData = "Formato de data de início está incorreto. Por favor, insira uma data válida no formato DD/MM/AAAA.)";
-	                return isErroData;
-	            }
-	        }			
-		}		
-		return isErroData;
-	}
-
 	@Transactional
 	public void excluirProjeto(Long id) {
 		try {
@@ -134,34 +119,39 @@ public class ProjetoService {
 	@Transactional
 	public String atualizarProjeto(Projeto projetoAtualizado, @RequestParam("gerentes") Long gerenteId,
 			@RequestParam("selectedStatus") String selectedStatus) {
-		Pessoa gerenteResponsavel = pessoaService.buscarPessoaPorId(gerenteId);
-		projetoAtualizado.setGerenteResponsavel(gerenteResponsavel);
-		projetoAtualizado.setStatus(selectedStatus);		
-		String classificacaoRisco = determinarClassificacaoRisco(projetoAtualizado);
-		projetoAtualizado.setRisco(classificacaoRisco);
-		String dataValidada = validarDatasProjeto(projetoAtualizado);
-		if (!dataValidada.equals("sucesso")) {
-			return dataValidada;
-		}
-		Long projetoId = projetoAtualizado.getId();
-		Optional<Projeto> projetoExistente = projetoRepository.findById(projetoId);
+		try {
+			if (projetoAtualizado != null) {
+				Pessoa gerenteResponsavel = pessoaService.buscarPessoaPorId(gerenteId);
+				projetoAtualizado.setGerenteResponsavel(gerenteResponsavel);
+				projetoAtualizado.setStatus(selectedStatus);
+				String classificacaoRisco = determinarClassificacaoRisco(projetoAtualizado);
+				projetoAtualizado.setRisco(classificacaoRisco);
+				String dataValidada = validarDatasProjeto(projetoAtualizado);
+				if (!dataValidada.equals("sucesso")) {
+					return dataValidada;
+				}
+				Long projetoId = projetoAtualizado.getId();
+				Optional<Projeto> projetoExistente = projetoRepository.findById(projetoId);
 
-		if (projetoExistente.isPresent()) {
-			Projeto projeto = projetoExistente.get();
-			projeto.setNome(projetoAtualizado.getNome());
-			projeto.setDataInicio(projetoAtualizado.getDataInicio());
-			projeto.setDataPrevisaoFim(projetoAtualizado.getDataPrevisaoFim());
-			projeto.setDataFim(projetoAtualizado.getDataFim());
-			projeto.setDescricao(projetoAtualizado.getDescricao());
-			projeto.setStatus(projetoAtualizado.getStatus());
-			projeto.setOrcamento(projetoAtualizado.getOrcamento());
-			projeto.setRisco(projetoAtualizado.getRisco());
-			projeto.setGerenteResponsavel(projetoAtualizado.getGerenteResponsavel());
-			projetoRepository.save(projeto);
-			return "atualizado";
-		} else {
-			throw new NoSuchElementException("Projeto não encontrado");
+				if (projetoExistente.isPresent()) {
+					Projeto projeto = projetoExistente.get();
+					projeto.setNome(projetoAtualizado.getNome());
+					projeto.setDataInicio(projetoAtualizado.getDataInicio());
+					projeto.setDataPrevisaoFim(projetoAtualizado.getDataPrevisaoFim());
+					projeto.setDataFim(projetoAtualizado.getDataFim());
+					projeto.setDescricao(projetoAtualizado.getDescricao());
+					projeto.setStatus(projetoAtualizado.getStatus());
+					projeto.setOrcamento(projetoAtualizado.getOrcamento());
+					projeto.setRisco(projetoAtualizado.getRisco());
+					projeto.setGerenteResponsavel(projetoAtualizado.getGerenteResponsavel());
+					projetoRepository.save(projeto);
+					return "atualizado";
+				}
+			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Erro ao remover projeto! " + e.getMessage());
 		}
+		return null;
 	}
 
 	@Transactional(readOnly = true)
