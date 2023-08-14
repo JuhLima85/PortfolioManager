@@ -56,6 +56,7 @@ footer {
 }
 
 .btn-red-personalizado{
+	margin-top: 8px;
 	background-color: #007bff; /* Azul escuro personalizado */
 	color: #ffffff; /* Nova cor do texto quando o cursor está sobre ele */
 }

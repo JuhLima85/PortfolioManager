@@ -17,7 +17,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 	<div class="card card-custom-width">
 		<div class="card-body">
 			<h1 class="text-center">Editar Projeto</h1>
-			<form method="POST" action="/codedeving/projetos/atualizar">
+			<form method="POST" action="/portfolio/projetos/atualizar">
 				<div class="form-group d-none">
 					<label for="id">Id</label> <input type="text" value="${projeto.id}"
 						class="form-control" id="nomeProjeto" name="id"

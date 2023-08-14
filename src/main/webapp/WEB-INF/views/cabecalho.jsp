@@ -5,12 +5,13 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+
 </head>
 <body>
 	<div>
-		<img src="${pageContext.request.contextPath}/imagens/header1.png" alt="AR - Soluções em Tecnologia" class="logo-cabecalho">
+		<img src="${pageContext.request.contextPath}/imagens/logo.png" alt="AR - Soluções em Tecnologia" class="logo-cabecalho">
 	</div>
-		<div class="card-body text-center mt-3">
+		<div class="card-body text-center mt-3">			
 			<a href="${pageContext.request.contextPath}/pessoas/novo"
 				class="btn btn-red-personalizado">Cadastrar Pessoa</a>			
 			<a href="${pageContext.request.contextPath}/pessoas/listar"

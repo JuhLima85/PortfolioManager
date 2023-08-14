@@ -57,7 +57,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 								<td class="align-middle text-center">${projeto.risco}</td>
 								<td class="align-middle text-center"><form:form
 										method="POST"
-										action="/codedeving/projetos/remover/${projeto.id}">
+										action="/portfolio/projetos/remover/${projeto.id}">
 										<c:choose>
 											<c:when
 												test="${projeto.status == 'Iniciado' || projeto.status == 'Em andamento' || projeto.status == 'Encerrado'}">
@@ -73,7 +73,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 												</button>
 											</c:otherwise>
 										</c:choose>
-										<a href="/codedeving/projetos/editar/${projeto.id}"
+										<a href="/portfolio/projetos/editar/${projeto.id}"
 											class="btn btn-primary"> <i id="boot-icon"
 											class="bi bi-pencil-fill"></i>
 										</a>

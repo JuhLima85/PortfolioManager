@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-	<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ include file="./base.jsp"%>
 <%
 SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
@@ -18,7 +18,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 	<div class="card card-custom-width">
 		<div class="card-body">
 			<h1 class="text-center">Editar Pessoa</h1>
-			<form method="POST" action="/codedeving/pessoas/atualizar"
+			<form method="POST" action="/portfolio/pessoas/atualizar"
 				modelAttribute="editar-pessoa">
 				<div class="form-group d-none">
 					<label for="id">Id</label> <input type="text" value="${pessoa.id}"
@@ -30,17 +30,17 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 						name="nome">
 				</div>
 				<div class="form-group">
-					<label for="nome">CPF</label> <input type="text"
-						value="${pessoa.cpf}" class="form-control" id="cpfPessoa"
-						name="cpf">
+					<label for="nome">CPF</label>&nbsp;&nbsp; <a
+						href="https://www.4devs.com.br/gerador_de_cpf" target="_blank">Simule
+						um CPF válido aqui</a> <input type="text" value="${pessoa.cpf}"
+						class="form-control" id="cpfPessoa" name="cpf">
 				</div>
-				
 				<div class="form-group">
 					<label for="nome">Data de Nascimento</label> <input type="text"
 						value="<fmt:formatDate value="${pessoa.dataNascimento}" pattern="dd/MM/yyyy" />"
 						class="form-control" id="dataNascimentoPessoa"
 						name="dataNascimento" placeholder="DD/MM/AAAA">
-				</div>				
+				</div>
 				<div class="form-group">
 					<label for="funcionarioPessoa">Funcionário?</label> <select
 						class="form-control" id="funcionarioPessoa" name="funcionario">

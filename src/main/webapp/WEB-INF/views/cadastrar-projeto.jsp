@@ -17,11 +17,11 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 	<div class="card card-custom-width-two">
 		<div class="card-body">
 			<h1 class="text-center">Cadastrar Projeto</h1>
-			<form:form method="POST" action="/codedeving/projetos/salvar">
+			<form:form method="POST" action="/portfolio/projetos/salvar">
 				<div class="row">
-					<div class="col-md-4 mb-3">
+					<div class="col-md-3 mb-3">
 						<div class="form-group">
-							<br> <label for="nome">Nome do Projeto</label> <input
+							<label for="nome">Nome do Projeto</label> <input
 								type="text" class="form-control" id="nomeProjeto" name="nome"
 								required="required" placeholder="Informe o nome do projeto"
 								value="${projeto.nome != null ? projeto.nome : ''}">
@@ -29,14 +29,14 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 					</div>
 					<div class="col-md-6 mb-3">
 						<div class="form-group">
-							<br> <label for="nome">Descrição</label> <input type="text"
+							<label for="nome">Descrição</label> <input type="text"
 								class="form-control" id="descricaoProjeto" name="descricao"
 								required="required" placeholder="Descrição do projeto"
 								value="${projeto.descricao != null ? projeto.descricao : ''}">
 						</div>
 					</div>
 
-					<div class="col-md-2 mb-3">
+					<div class="col-md-3 mb-3">
 						<div class="form-group">
 							<label for="opcao">Gerente Responsável</label> <select
 								class="form-control" name="gerentes" id="gerentes">

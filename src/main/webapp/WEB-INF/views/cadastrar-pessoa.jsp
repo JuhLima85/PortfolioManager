@@ -18,8 +18,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 	<div class="card card-custom-width">
 		<div class="card-body">
 			<h1 class="text-center">Cadastrar Pessoa</h1>
-			<form:form id="formPessoa" method="POST"
-				action="/codedeving/pessoas/salvar"
+			<form:form id="formPessoa" method="POST" action="/portfolio/pessoas/salvar"
 				modelAttribute="cadastrar-pessoa">
 
 				<div class="form-group">
@@ -29,11 +28,13 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 						value="${pessoa.nome != null ? pessoa.nome : ''}">
 				</div>
 				<div class="form-group">
-					<label for="nome">CPF</label> <input type="text"
-						class="form-control" id="cpfPessoa" name="cpf" required="required"
+					<label for="nome">CPF</label>&nbsp;&nbsp; <a
+						href="https://www.4devs.com.br/gerador_de_cpf" target="_blank">    Simule
+						um CPF válido aqui</a> <input type="text" class="form-control"
+						id="cpfPessoa" name="cpf" required="required"
 						placeholder="00000000000"
 						value="${pessoa.cpf != null ? pessoa.cpf : ''}">
-				</div>
+				</div>				
 				<div class="form-group">
 					<label for="nome">Data de Nascimento</label> <input type="text"
 						class="form-control" id="dataNascimentoPessoa"

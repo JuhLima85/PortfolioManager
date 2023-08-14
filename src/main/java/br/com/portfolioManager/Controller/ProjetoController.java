@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +34,7 @@ public class ProjetoController {
 	public ProjetoController(ProjetoService projetoService, PessoaService pessoaService) {
 		this.projetoService = projetoService;
 		this.pessoaService = pessoaService;
-	}
+	}	
 
 	@GetMapping("/listar")
 	public String listar(Model model) {

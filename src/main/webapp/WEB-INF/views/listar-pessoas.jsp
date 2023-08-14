@@ -13,10 +13,11 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 		<div class="alert alert-danger" role="alert">${mensagem_error}</div>
 	</c:if>
 </div>
-<div class="container mt-3">
+<div class="container-fluid mt-3">
 	<div class="card card-custom-width-two">
 		<div class="card-body">
 			<h1 class="text-center">Pessoas Cadastradas</h1>
+			<div class="table-responsive">
 			<table class="table table-bordered table-striped">
 				<thead>
 					<tr>
@@ -43,7 +44,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 									</c:otherwise>
 								</c:choose></td>
 							<td class="align-middle text-center"><form:form
-									method="POST" action="/codedeving/pessoas/remover/${pessoa.id}">
+									method="POST" action="/portfolio/pessoas/remover/${pessoa.id}">
 									<c:choose>
 										<c:when test="${gerentesResponsaveis.contains(pessoa)}">
 											<button type="submit" value="excluir" class="btn btn-danger"
@@ -58,7 +59,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 											</button>
 										</c:otherwise>
 									</c:choose>
-									<a href="/codedeving/pessoas/editar/${pessoa.id}"
+									<a href="/portfolio/pessoas/editar/${pessoa.id}"
 										class="btn btn-primary"> <i id="boot-icon"
 										class="bi bi-pencil-fill"></i>
 									</a>
@@ -67,6 +68,7 @@ SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 					</c:forEach>
 				</tbody>
 			</table>
+			</div>
 		</div>
 	</div>
 </div>
